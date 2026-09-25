@@ -1,0 +1,611 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Logix — Logistics & Shipment Tracking Platform */
+:root {
+  /* Brand Colors: Deep Navy, Steel Blue, Teal Accent, Off-White, Soft Neutral */
+  --background: #F6F8FB; /* Light mist */
+  --foreground: #0F1B2D; /* Deep navy text */
+  --card: #FFFFFF;
+  --card-foreground: #0F1B2D;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F1B2D;
+  --primary: #0B5FFF; /* Logistics blue */
+  --primary-foreground: #FFFFFF;
+  --secondary: #E3EBF5; /* Steel tint */
+  --secondary-foreground: #0F1B2D;
+  --muted: #EEF2F7;
+  --muted-foreground: #5A6982;
+  --accent: #06B6D4; /* Cyan/teal accent */
+  --accent-foreground: #051A22;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #D8E1EC;
+  --input: #E3EBF5;
+  --ring: #0B5FFF;
+  --chart-1: #0B5FFF;
+  --chart-2: #06B6D4;
+  --chart-3: #10B981;
+  --chart-4: #F59E0B;
+  --chart-5: #8B5CF6;
+  --radius: 1rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F1B2D;
+  --sidebar-primary: #0B5FFF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EEF2F7;
+  --sidebar-accent-foreground: #0F1B2D;
+  --sidebar-border: #D8E1EC;
+  --sidebar-ring: #0B5FFF;
+}
+
+.dark {
+  --background: #0B1120; /* Deep navy */
+  --foreground: #E6EEF8;
+  --card: #111A2E;
+  --card-foreground: #E6EEF8;
+  --popover: #111A2E;
+  --popover-foreground: #E6EEF8;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1C2843;
+  --secondary-foreground: #E6EEF8;
+  --muted: #162035;
+  --muted-foreground: #8897B3;
+  --accent: #22D3EE;
+  --accent-foreground: #041318;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #253250;
+  --input: #1C2843;
+  --ring: #3B82F6;
+  --chart-1: #3B82F6;
+  --chart-2: #22D3EE;
+  --chart-3: #34D399;
+  --chart-4: #FBBF24;
+  --chart-5: #A78BFA;
+  --sidebar: #0F1A2F;
+  --sidebar-foreground: #E6EEF8;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1C2843;
+  --sidebar-accent-foreground: #E6EEF8;
+  --sidebar-border: #253250;
+  --sidebar-ring: #3B82F6;
+}
+
+@theme inline {
+  --font-sans: 'DM Sans', 'DM Sans Fallback', sans-serif;
+  --font-serif: 'Playfair Display', 'Playfair Display Fallback', serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 16px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --breakpoint-vsm: 781px;
+  --breakpoint-vmd: 1025px;
+  --breakpoint-vlg: 1245px;
+  --breakpoint-vxl: 1710px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    /* Reserve the scrollbar track so locking scroll for a drawer/modal never
+       shifts the whole layout (a classic "jump" during interactions). */
+    scrollbar-gutter: stable;
+    /*
+     * Structurally forbid sideways panning of the document.
+     *
+     * Clipping only `body` is not enough on iOS Safari: it still pans the
+     * visual viewport to reveal overflowing content, so a swipe on the phone can
+     * drag the whole page sideways (and, near the edge, trigger the browser's
+     * back gesture — which is why swiping right on the homepage could surface
+     * the previously visited tracking page). Putting the guard on the root
+     * element removes the overflow at the source, for every route and state.
+     *
+     * `clip` rather than `hidden`: `clip` does not turn the element into a
+     * scroll container, so the viewport keeps scrolling vertically, `position:
+     * sticky` keeps resolving against the viewport, and no scrollbar appears.
+     */
+    overflow-x: hidden; /* fallback for engines without `overflow: clip` */
+    overflow-x: clip;
+    /* Never chain a horizontal overscroll into the page. Chrome/Firefox also
+       stop their swipe-to-navigate gesture on this; Safari ignores it for
+       history navigation by design (WebKit bug 240183), where the root clip
+       above is what prevents the gesture from being reached accidentally. */
+    overscroll-behavior-x: none;
+  }
+  /* Never make the browser wait for a possible double-tap zoom on controls. */
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+  body {
+    -webkit-tap-highlight-color: transparent;
+    /* Same guard on `body`, kept as `clip` so the element stays a normal block
+       box: `overflow-x: hidden` here would force `overflow-y: auto`, turning
+       `body` into its own scrollport and silently breaking every `sticky`
+       header inside it. */
+    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+  html.mobile-menu-open,
+  body.mobile-menu-open {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Logix custom soft shadow utility */
+.logix-shadow {
+  box-shadow: rgba(15, 27, 45, 0.04) 0px 0px 0px 1px, rgba(15, 27, 45, 0.04) 0px 1px 1px -0.5px, rgba(15, 27, 45, 0.04) 0px 3px 3px -1.5px, rgba(15, 27, 45, 0.04) 0px 6px 6px -3px, rgba(15, 27, 45, 0.04) 0px 12px 12px -6px, rgba(15, 27, 45, 0.04) 0px 24px 24px -12px;
+}
+
+/* Keep original boty-shadow utility for backward compatibility with existing classes */
+.boty-shadow {
+  box-shadow: rgba(15, 27, 45, 0.04) 0px 0px 0px 1px, rgba(15, 27, 45, 0.04) 0px 1px 1px -0.5px, rgba(15, 27, 45, 0.04) 0px 3px 3px -1.5px, rgba(15, 27, 45, 0.04) 0px 6px 6px -3px, rgba(15, 27, 45, 0.04) 0px 12px 12px -6px, rgba(15, 27, 45, 0.04) 0px 24px 24px -12px;
+}
+
+.customer-shell {
+  background-image: radial-gradient(circle at 8% 12%, rgb(6 182 212 / 0.08), transparent 24rem), radial-gradient(circle at 92% 38%, rgb(11 95 255 / 0.06), transparent 26rem);
+}
+
+.admin-shell {
+  background-image: radial-gradient(circle at 88% 10%, rgb(11 95 255 / 0.05), transparent 28rem), linear-gradient(180deg, rgb(238 242 247 / 0.35), transparent 28rem);
+}
+
+.dark .customer-shell {
+  background-image: radial-gradient(circle at 8% 12%, rgb(34 211 238 / 0.08), transparent 24rem), radial-gradient(circle at 92% 38%, rgb(59 130 246 / 0.08), transparent 26rem);
+}
+
+.dark .admin-shell {
+  background-image: radial-gradient(circle at 88% 10%, rgb(34 211 238 / 0.07), transparent 28rem), linear-gradient(180deg, rgb(22 32 53 / 0.45), transparent 28rem);
+}
+
+/* Smooth transitions */
+.boty-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Blur in animation (fade + slide, no blur so text stays sharp) */
+@keyframes blur-in {
+  0% {
+    opacity: 0;
+    filter: blur(0);
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.animate-blur-in {
+  animation: blur-in 0.8s ease-out;
+}
+
+/* iOS Safari auto-zooms any input whose font-size is below 16px on focus.
+   Keep admin controls at 16px through the tablet breakpoint as well; relying
+   only on `maximumScale` is not enough on iOS Safari. */
+@media (max-width: 1244px) {
+  .admin-shell input,
+  .admin-shell select,
+  .admin-shell textarea,
+  .admin-shell [data-slot="select-trigger"],
+  .admin-auth input,
+  .admin-auth select,
+  .admin-auth textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Keep non-admin mobile forms protected without changing their desktop sizing. */
+@media (max-width: 767px) {
+  input:not([data-input-otp]):not([data-slot='input-otp']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Scale fade in animation */
+@keyframes scale-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-fade-in {
+  animation: scale-fade-in 0.6s ease-out;
+}
+
+/* Pulse breathing */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Timeline connector gradient */
+.timeline-line {
+  background: linear-gradient(to bottom, var(--primary) 0%, var(--accent) 100%);
+}
+
+/* ---------- Live shipment operations motion ---------- */
+
+/*
+ * All of the classes below are opt-in and purely decorative: nothing toggles
+ * layout, so panels can animate in without shifting the page.
+ */
+
+/* Surfaces / sections entering the viewport (stagger with an inline delay). */
+@keyframes rise-in {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-rise-in {
+  animation: rise-in 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/*
+ * A scan that just landed flashes an inset ring + tint. `inset` keeps the
+ * highlight inside the row: no clipping, no reflow, and it never fights the
+ * node marker's own ring shadow.
+ */
+@keyframes flash-ring {
+  0% {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent);
+    background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+  55% {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 28%, transparent);
+    background-color: color-mix(in srgb, var(--primary) 6%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 1px transparent;
+    background-color: transparent;
+  }
+}
+.timeline-flash {
+  border-radius: 1rem;
+  animation: flash-ring 2.8s ease-out 1;
+}
+
+/* Expanding halo behind the live marker / current step. */
+@keyframes pulse-halo {
+  0% { transform: scale(0.7); opacity: 0.65; }
+  70% { transform: scale(1.9); opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.animate-pulse-halo {
+  animation: pulse-halo 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+
+/* Sweep that keeps "live" surfaces feeling alive. */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(240%); }
+}
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.8s ease-in-out infinite;
+}
+
+/* Filled progress rail sheen — reads as movement while a leg is in progress. */
+@keyframes rail-sheen {
+  0% { transform: translateX(-110%); opacity: 0; }
+  35% { opacity: 0.55; }
+  100% { transform: translateX(320%); opacity: 0; }
+}
+.animate-rail-sheen {
+  animation: rail-sheen 3s ease-in-out infinite;
+}
+
+/* Gentle bob for the vehicle marker so it never looks frozen between updates. */
+@keyframes idler-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+.animate-idler-bob {
+  animation: idler-bob 1.8s ease-in-out infinite;
+}
+
+/*
+ * The remaining leg of a route: same dash geometry as `.route-dash`, but the
+ * dashes travel left → right, i.e. in the direction of travel, so the rail does
+ * not appear to run backwards while the vehicle marker moves forward.
+ */
+@keyframes route-dash-forward {
+  to { background-position-x: 28px; }
+}
+.route-dash-forward {
+  background-image: repeating-linear-gradient(90deg, currentColor 0 12px, transparent 12px 28px);
+  animation: route-dash-forward 1.1s linear infinite;
+}
+
+/* ---------- Admin operations polish ---------- */
+
+/* Subtle grid backdrop used on auth / empty surfaces (light + dark aware) */
+.ops-auth-grid {
+  background-image: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--border) 45%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--border) 45%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 25%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 25%, transparent 100%);
+}
+
+/* Safe-area bottom padding for fixed mobile bars and sheets */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
+/* Subtle, theme-aware admin scrollbars */
+.admin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--border) 90%, transparent) transparent;
+}
+.admin-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.admin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+.admin-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--border) 60%, var(--muted-foreground));
+}
+
+/* Elevated panel surface used on dashboards */
+.ops-elevated {
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--primary) 5%, transparent), transparent 45%),
+    var(--card);
+}
+
+/* Prevent chart tooltips from clipping on mobile */
+.recharts-wrapper,
+.recharts-surface {
+  max-width: 100%;
+}
+
+/* Focus ring consistency for custom buttons across admin */
+.ops-focusable:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Scroll & rendering performance ---------- */
+
+/*
+ * Lenis' recommended CSS.
+ *  - `scroll-behavior: auto` while Lenis drives the scroll: otherwise the native
+ *    smooth-scroll animation fights the JS one and the page visibly stutters.
+ *  - `overscroll-behavior: contain` inside nested scroll areas (markers on
+ *    `data-lenis-prevent`) so wheel/touch momentum doesn't leak into the page.
+ *  - `pointer-events: none` on iframes while scrolling, so the frame can't
+ *    swallow the gesture mid-scroll.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/*
+ * Skip layout/paint for sections that are far off screen. `contain-intrinsic-size`
+ * reserves an estimated height so the scrollbar stays honest — long pages then
+ * scroll without recalculating the whole document every frame.
+ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+/*
+ * Media cards: nothing painted inside can affect anything outside, so the
+ * compositor can skip the rest of the grid during hover/scale animations.
+ */
+.media-contain {
+  contain: layout paint style;
+}
+
+/*
+ * Videos get their own compositor layer: scrolling then moves a texture instead
+ * of re-rasterising a decoded frame on the main thread (the main cause of
+ * "smooth scroll suddenly stutters" when a background clip is playing).
+ */
+video {
+  backface-visibility: hidden;
+}
+
+/* ===== Delivery coverage: marquee lanes, flying plane, sailing ship, floating emojis ===== */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+/* Row 1 travels right → left; row 2 (reverse) travels left → right. */
+.animate-marquee-l { animation: marquee 45s linear infinite; }
+.animate-marquee-r { animation: marquee 60s linear infinite reverse; }
+.marquee-mask:hover .animate-marquee-l,
+.marquee-mask:hover .animate-marquee-r { animation-play-state: paused; }
+
+@keyframes lane-fly {
+  0% { transform: translateX(-8%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(108%); opacity: 0; }
+}
+@keyframes lane-sail {
+  0% { transform: translateX(108%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(-8%); opacity: 0; }
+}
+.animate-plane { animation: lane-fly 16s linear infinite; }
+.animate-ship { animation: lane-sail 26s linear infinite; }
+
+@keyframes float-emoji {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-4px) rotate(3deg); }
+}
+.animate-float-emoji { display: inline-block; animation: float-emoji 3s ease-in-out infinite; }
+
+/* ===== Front-page motion polish ===== */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float-y { animation: float-y 4s ease-in-out infinite; }
+.animate-float-y-slow { animation: float-y 6.5s ease-in-out infinite; }
+
+/* Dashed "remaining journey" line that scrolls toward the destination. */
+@keyframes route-dash { to { background-position-x: -28px; } }
+.route-dash {
+  background-image: repeating-linear-gradient(90deg, currentColor 0 12px, transparent 12px 28px);
+  animation: route-dash 1.1s linear infinite;
+}
+
+@keyframes pan-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-pan {
+  background-size: 200% 200%;
+  animation: pan-gradient 6s ease infinite;
+}
+
+@keyframes scroll-cue {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  55% { transform: translateY(7px); opacity: 0.35; }
+}
+.animate-scroll-cue { animation: scroll-cue 1.8s ease-in-out infinite; }
+
+/* Fully honour the OS "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-blur-in,
+  .animate-scale-fade-in,
+  .animate-breathe,
+  .animate-ping,
+  .animate-pulse,
+  .animate-spin,
+  .animate-marquee-l,
+  .animate-marquee-r,
+  .animate-plane,
+  .animate-ship,
+  .animate-float-emoji,
+  .animate-float-y,
+  .animate-float-y-slow,
+  .animate-scroll-cue,
+  .animate-gradient-pan,
+  .animate-rise-in,
+  .timeline-flash,
+  .animate-pulse-halo,
+  .animate-shimmer-sweep,
+  .animate-rail-sheen,
+  .animate-idler-bob,
+  .route-dash,
+  .route-dash-forward {
+    animation: none !important;
+  }
+  .boty-transition,
+  .logix-shadow {
+    transition-duration: 0.01ms !important;
+  }
+}
