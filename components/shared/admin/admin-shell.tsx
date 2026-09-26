@@ -6,8 +6,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   ArrowLeft,
   LayoutDashboard,
+  LogOut,
   MapPinned,
   Package,
   PanelLeftClose,
@@ -33,6 +44,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+
+  /* Leaving operations drops the admin context, so it always asks first. */
+  const leaveOperations = () => {
+    setConfirmLeave(false);
+    router.push("/");
+  };
 
   useEffect(() => {
     try {
@@ -129,9 +147,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <Link href="/admin/settings" aria-label="Account settings" title="Account settings" className="flex items-center justify-center rounded-xl px-2 py-3 text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground">
                   <Settings className="h-4 w-4" />
                 </Link>
-                <Link href="/" aria-label="Back to site" title="Back to site" className="flex items-center justify-center rounded-xl px-2 py-3 text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground">
+                <button
+                  type="button"
+                  onClick={() => setConfirmLeave(true)}
+                  aria-label="Back to site"
+                  title="Back to site"
+                  className="flex items-center justify-center rounded-xl px-2 py-3 text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground"
+                >
                   <ArrowLeft className="h-4 w-4" />
-                </Link>
+                </button>
               </div>
             ) : (
               <>
@@ -142,9 +166,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 <Link href="/admin/settings" className="mt-3 inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground">
                   <Settings className="h-3.5 w-3.5" /> Account settings
                 </Link>
-                <Link href="/" className="mt-1 inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground">
+                <button
+                  type="button"
+                  onClick={() => setConfirmLeave(true)}
+                  className="mt-1 inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground"
+                >
                   <ArrowLeft className="h-3.5 w-3.5" /> Back to site
-                </Link>
+                </button>
               </>
             )}
           </div>
@@ -162,9 +190,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </Link>
             <div className="flex shrink-0 items-center gap-2">
               <ThemeToggle size="sm" />
-              <Link href="/" className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => setConfirmLeave(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              >
                 <ArrowLeft className="h-3.5 w-3.5" /> Site
-              </Link>
+              </button>
             </div>
           </div>
       </header>
@@ -203,6 +235,30 @@ export function AdminShell({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+
+      <AlertDialog open={confirmLeave} onOpenChange={setConfirmLeave}>
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-md">
+          <AlertDialogHeader>
+            <span className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <LogOut className="h-6 w-6" />
+            </span>
+            <AlertDialogTitle className="text-center text-lg">Leave Operations?</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-sm leading-relaxed">
+              You are about to return to the public ArcBest site and leave the admin workspace. Any unsaved
+              changes on this page will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel className="h-11 w-full sm:h-10 sm:w-auto">Stay in Operations</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={leaveOperations}
+              className="h-11 w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:h-10 sm:w-auto"
+            >
+              Yes, go to site
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
