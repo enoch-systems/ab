@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, X, Package, LogOut, User, Bell, LayoutDashboard, Truck, BarChart3, Activity, Settings, Users, Home, Route, CircleHelp, Phone, ShieldCheck, MoveLeft, Compass, ChevronDown, LogIn, Rocket, BriefcaseBusiness, FileQuestion } from "lucide-react"
+import { Menu, X, Package, LogOut, Bell, LayoutDashboard, Truck, BarChart3, Activity, Settings, Users, Home, Route, CircleHelp, Phone, ShieldCheck, MoveLeft, Compass, ChevronDown, LogIn, Rocket, BriefcaseBusiness, FileQuestion, Inbox, CircleUserRound } from "lucide-react"
 import { useAppState } from "@/lib/app-state"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { BrandLogo } from "@/components/shared/brand-logo"
@@ -16,7 +16,9 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [exploreOpen, setExploreOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const exploreRef = useRef<HTMLDivElement>(null)
+  const accountRef = useRef<HTMLDivElement>(null)
   const { session, currentCustomer, logout, unreadCount } = useAppState()
   const router = useRouter()
   const pathname = usePathname()
@@ -24,6 +26,15 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
   const isAdmin = variant === "admin"
   const isCustomer = variant === "customer" || (session?.role === "customer" && variant === "default")
   const unread = session?.role === "customer" ? unreadCount(session.userId) : 0
+  /**
+   * Any signed-in session gets the app nav and loses the marketing "Home" /
+   * "Explore" list — those links are for visitors who have not signed in yet.
+   */
+  const signedInCustomer = session?.role === "customer"
+  const signedIn = session != null
+  const accountFirstName = (currentCustomer?.fullName ?? "").trim().split(/\s+/)[0] || "My account"
+  /** Marketing links belong to the public site, never to a signed-in app view. */
+  const showExploreLinks = variant === "default" && !signedIn
   const adminDesktopClass = isAdmin ? "xl:flex" : "lg:flex"
   const adminMobileClass = isAdmin ? "xl:hidden" : "lg:hidden"
   const onPublicAuthPage = pathname === "/customer/login" || pathname === "/customer/signup"
@@ -92,18 +103,25 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
   useEffect(() => {
     setIsMenuOpen(false)
     setExploreOpen(false)
+    setAccountOpen(false)
   }, [pathname])
 
-  // Close the Explore dropdown on outside click / Escape.
+  // Close the Explore / account dropdowns on outside click or Escape.
   useEffect(() => {
-    if (!exploreOpen) return
+    if (!exploreOpen && !accountOpen) return
     const onPointerDown = (event: PointerEvent) => {
       if (exploreRef.current && !exploreRef.current.contains(event.target as Node)) {
         setExploreOpen(false)
       }
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
+        setAccountOpen(false)
+      }
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setExploreOpen(false)
+      if (event.key === "Escape") {
+        setExploreOpen(false)
+        setAccountOpen(false)
+      }
     }
     document.addEventListener("pointerdown", onPointerDown)
     document.addEventListener("keydown", onKeyDown)
@@ -111,7 +129,7 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
       document.removeEventListener("pointerdown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [exploreOpen])
+  }, [exploreOpen, accountOpen])
 
   const handleLogout = async () => {
     await logout()
@@ -120,7 +138,7 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
     router.refresh()
   }
 
-  const navLinks: { name: string; href: string; badge?: number }[] = navigation.shared
+  const navLinks: { name: string; href: string; badge?: number; blurb?: string }[] = navigation.shared
     .filter((link) => {
       // Hide customer-only links for logged-out / non-customer visitors.
       // This prevents e.g. "Notifications 0" leaking into the public header.
@@ -153,8 +171,12 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
 
   const exploreParentActive = navigation.explore.some((item) => isExploreItemActive(item.href))
 
+  /** True when the visitor is already inside the signed-in account area. */
+  const accountParentActive = navLinks.some((link) => isActive(link.href))
+
+  const homeHref = signedInCustomer ? "/customer/dashboard" : session?.role === "admin" ? "/admin" : "/"
   const Brand = ({ centered = false }: { centered?: boolean }) => (
-    <Link href="/" onClick={() => setCurrentHash("")} className={cn(centered && "lg:absolute lg:left-1/2 lg:-translate-x-1/2")}>
+    <Link href={homeHref} onClick={() => setCurrentHash("")} className={cn(centered && "lg:absolute lg:left-1/2 lg:-translate-x-1/2")}>
       <div className="flex items-center gap-2">
         <BrandLogo className="h-8 w-8 rounded-lg object-contain sm:h-9 sm:w-9" />
         <span className="font-serif text-xl sm:text-2xl tracking-wide text-foreground font-semibold">
@@ -194,7 +216,7 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
 
           {/* Center Nav for public */}
           <div className="hidden lg:flex items-center gap-1 ml-6">
-            {!isAdmin && (
+            {!isAdmin && !signedIn && (
               <Link
                 href="/"
                 onClick={() => setCurrentHash("")}
@@ -209,7 +231,7 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
                 Home
               </Link>
             )}
-            {!isAdmin && (
+            {!isAdmin && showExploreLinks && (
               <div ref={exploreRef} className="relative">
                 <button
                   type="button"
@@ -286,7 +308,73 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
                 )}
               </div>
             )}
-            {navLinks.map((link) => (
+
+            {/* Signed-in customers: no marketing dropdown. They get an account
+                menu instead — icon, name and one line of context per link, with
+                the unread count riding along on Notifications. */}
+            {!isAdmin && signedInCustomer && (
+              <div ref={accountRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((v) => !v)}
+                  aria-expanded={accountOpen}
+                  aria-haspopup="true"
+                  className={cn(
+                    "relative px-2.5 py-1.5 rounded-xl text-sm tracking-wide boty-transition whitespace-nowrap inline-flex items-center gap-2 cursor-pointer",
+                    accountOpen || accountParentActive
+                      ? activePill
+                      : "text-foreground/70 hover:bg-accent/10 hover:text-primary",
+                  )}
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-[13px] font-semibold text-primary">
+                    {accountFirstName.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="flex flex-col items-start leading-tight">
+                    <span className="text-[13px] font-semibold text-foreground">{accountFirstName}</span>
+                    <span className="text-[10px] font-normal text-muted-foreground">Signed in</span>
+                  </span>
+                  <ChevronDown className={cn("w-3.5 h-3.5 boty-transition", accountOpen && "rotate-180")} />
+                </button>
+                {accountOpen && (
+                  <div className="absolute right-0 top-[calc(100%+10px)] w-[340px] rounded-2xl border border-border/60 bg-card/95 backdrop-blur-md logix-shadow p-2 animate-scale-fade-in">
+                    <p className="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Your account
+                    </p>
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        href={link.href}
+                        onClick={() => setAccountOpen(false)}
+                        aria-current={isActive(link.href) ? "page" : undefined}
+                        className={cn(
+                          "flex items-start gap-3 px-3 py-2.5 rounded-xl boty-transition group",
+                          isActive(link.href) ? activePill : "hover:bg-accent/10",
+                        )}
+                      >
+                        <span className="mt-0.5 text-primary/70 group-hover:text-primary">
+                          <NavIcon name={link.name} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className="block text-sm font-medium text-foreground group-hover:text-primary">
+                              {link.name}
+                            </span>
+                            {link.badge != null && link.badge > 0 && (
+                              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                                {link.badge > 99 ? '99+' : link.badge}
+                              </span>
+                            )}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">{link.blurb}</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isAdmin && navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -386,7 +474,7 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
         >
           <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
             {/* Mobile: Home + Explore section links (replaces the old bare "Tracking" link). */}
-            {!isAdmin && (
+            {!isAdmin && !signedIn && (
               <>
                 <Link
                   href="/"
@@ -407,6 +495,10 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
                     Home
                   </span>
                 </Link>
+                {/* "Explore ArcBest" is for visitors without a session. Signed-in
+                    customers get the account list further down instead. */}
+                {showExploreLinks && (
+                  <>
                 <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Explore ArcBest
                 </p>
@@ -438,9 +530,51 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
                     </Link>
                   )
                 })}
+                  </>
+                )}
               </>
             )}
-            {navLinks.map((link) => (
+
+            {/* Signed-in mobile menu: icon, name and a short description per
+                destination, with the unread count on Notifications. */}
+            {!isAdmin && signedInCustomer && (
+              <>
+                <p className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Your account
+                </p>
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-current={isActive(link.href) ? "page" : undefined}
+                    className={cn(
+                      "relative z-[60] flex items-start gap-3 px-4 py-3 rounded-xl text-sm tracking-wide boty-transition cursor-pointer",
+                      isActive(link.href)
+                        ? activePill
+                        : "text-foreground/80 hover:bg-accent/10 hover:text-primary",
+                    )}
+                  >
+                    <span className="mt-0.5">
+                      <NavIcon name={link.name} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="block font-medium">{link.name}</span>
+                        {link.badge != null && link.badge > 0 && (
+                          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
+                            {link.badge > 99 ? '99+' : link.badge}
+                          </span>
+                        )}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">{link.blurb}</span>
+                    </span>
+                  </Link>
+                ))}
+              </>
+            )}
+
+            {isAdmin && navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -495,8 +629,8 @@ export function Header({ variant = "default" }: { variant?: Variant } = {}) {
                   href="/customer/dashboard"
                   className="flex w-full items-center justify-center gap-2 py-3 rounded-full bg-primary/10 text-primary text-sm boty-transition hover:bg-primary/15"
                 >
-                  <MoveLeft className="w-4 h-4" />
-                  Back to Home
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
                 </Link>
               )}
 
@@ -588,8 +722,8 @@ function NavIcon({ name }: { name: string }) {
     Settings,
     "New Shipment": Package,
     Notifications: Bell,
-    Inbox: Bell,
-    Profile: User,
+    Inbox: Inbox,
+    Profile: CircleUserRound,
   }
   const Icon = icons[name as keyof typeof icons] || ShieldCheck
   return <Icon className="h-4 w-4 shrink-0" />

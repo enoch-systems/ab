@@ -1,29 +1,98 @@
-'use client';
-
-import { useState } from 'react';
-import { useAppState } from '@/lib/app-state';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { formatDateTime } from '@/components/shared/status-badge';
-import { Inbox, Send, ShieldCheck, UserRound } from 'lucide-react';
-import { richTrackingText } from '@/components/shared/copy-tracking-id';
+"use client";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useAppState } from "@/lib/app-state";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/components/shared/status-badge";
+import { Inbox, ChevronLeft, ChevronDown, ShieldCheck } from "lucide-react";
+import { richTrackingText } from "@/components/shared/copy-tracking-id";
+import { cn } from "@/lib/utils";
 
 export default function CustomerInboxPage() {
-  const { session, getSupportMessages, sendSupportMessage, markSupportMessageRead } = useAppState();
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
-  const [sending, setSending] = useState(false);
-  const messages = session ? getSupportMessages(session.userId) : [];
-  const send = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!session) return;
-    setSending(true);
-    const result = await sendSupportMessage({ customerId: session.userId, subject, body });
-    setSending(false);
-    if (!result.success) return;
-    setSubject(''); setBody('');
+  const { session, getSupportMessages, markSupportMessageRead } = useAppState();
+  const messages = useMemo(
+    () => (session ? getSupportMessages(session.userId) : []),
+    [session, getSupportMessages]
+  );
+  const [openId, setOpenId] = useState<string | null>(null);
+  const toggle = (id: string, readAt: string | null | undefined) => {
+    setOpenId((c) => (c === id ? null : id));
+    if (!readAt) void markSupportMessageRead(id);
   };
-  return <div className="mx-auto max-w-5xl px-4 py-8"><div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.2em] text-primary">Account</p><h1 className="mt-1 font-serif text-3xl">Support inbox</h1><p className="mt-1 text-sm text-muted-foreground">Messages from ArcBest about your account and shipments.</p></div><div className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">{messages.length} messages</div></div><div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]"><Card><CardHeader><CardTitle className="flex items-center gap-2"><Inbox className="h-5 w-5 text-primary" />Messages</CardTitle></CardHeader><CardContent className="space-y-3">{!messages.length ? <p className="py-12 text-center text-sm text-muted-foreground">No support messages yet.</p> : messages.map((message) => <div key={message.id} onClick={() => void markSupportMessageRead(message.id)} className={`cursor-pointer w-full rounded-2xl border p-4 transition hover:bg-muted/30 ${message.readAt ? '' : 'border-primary/30 bg-primary/5'}`}><div className="flex items-center justify-between gap-3"><p className="min-w-0 flex-1 font-semibold">{message.subject}</p><span className="shrink-0 text-xs text-muted-foreground">{formatDateTime(message.createdAt)}</span></div><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{richTrackingText(message.body)}</p><p className="mt-3 text-xs font-medium text-primary">{message.senderRole === 'admin' ? 'ArcBest support' : message.senderRole === 'system' ? 'ArcBest system' : 'You'}</p></div>)}</CardContent></Card><Card className="h-fit"><CardHeader><CardTitle>Contact support</CardTitle></CardHeader><CardContent><form onSubmit={send} className="space-y-4"><div className="space-y-2"><label className="text-sm font-medium" htmlFor="support-subject">Subject</label><Input id="support-subject" value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="How can we help?" required /></div><div className="space-y-2"><label className="text-sm font-medium" htmlFor="support-body">Message</label><Textarea id="support-body" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Write your message…" className="min-h-32" required /></div><Button type="submit" disabled={sending} className="w-full">{sending ? 'Sending…' : <><Send className="mr-2 h-4 w-4" />Send message</>}</Button><p className="flex items-start gap-2 text-xs text-muted-foreground"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />Your messages are private to you and the ArcBest support team.</p></form></CardContent></Card></div></div>;
+  return <InboxView messages={messages} openId={openId} toggle={toggle} />;
+}
+
+function InboxView({ messages, openId, toggle }: {
+  messages: ReturnType<ReturnType<typeof useAppState>["getSupportMessages"]>;
+  openId: string | null;
+  toggle: (id: string, readAt: string | null | undefined) => void;
+}) {
+  return (
+    <div className="mx-auto w-full min-w-0 max-w-5xl px-3 py-6 sm:px-4 sm:py-8">
+      <div className="mb-5 sm:mb-6">
+        <Button asChild variant="ghost" className="mb-3 h-9 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground sm:mb-4">
+          <Link href="/customer/dashboard" className="inline-flex items-center gap-2">
+            <ChevronLeft className="h-4 w-4 shrink-0" />
+            Back
+          </Link>
+        </Button>
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">Account</p>
+            <h1 className="mt-1 font-serif text-[1.7rem] leading-tight sm:text-3xl">Support inbox</h1>
+            <p className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
+              Messages from ArcBest about your account and shipments.
+            </p>
+          </div>
+          <div className="shrink-0 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
+            {messages.length} {messages.length === 1 ? "message" : "messages"}
+          </div>
+        </div>
+      </div>
+      <Card className="min-w-0 border">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="flex min-w-0 items-center gap-2">
+            <Inbox className="h-5 w-5 shrink-0 text-primary" />
+            <span className="truncate">Messages</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="min-w-0 space-y-2.5 px-3 sm:space-y-3 sm:px-6">
+          {!messages.length ? (
+            <p className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+              No support messages yet.
+            </p>
+          ) : (
+            messages.map((m) => {
+              const open = openId === m.id;
+              const unread = !m.readAt;
+              return (
+                <div key={m.id} className={cn("min-w-0 rounded-2xl border", unread ? "border-primary/30 bg-primary/5" : "border-border/70")}>
+                  <button type="button" onClick={() => toggle(m.id, m.readAt)} aria-expanded={open} className="flex w-full min-w-0 cursor-pointer items-center gap-3 px-3 py-3.5 text-left sm:px-4">
+                    <span className="min-w-0 flex-1">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{m.subject}</span>
+                        {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-label="Unread" />}
+                      </span>
+                      <span className="mt-1 block truncate text-xs text-muted-foreground">{formatDateTime(m.createdAt)}</span>
+                    </span>
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+                  </button>
+                  {open && (
+                    <div className="min-w-0 border-t border-border/60 px-3 py-4 sm:px-4">
+                      <p className="min-w-0 whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">{richTrackingText(m.body)}</p>
+                      <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+                        <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+                        {m.senderRole === "admin" ? "ArcBest support" : m.senderRole === "system" ? "ArcBest system" : "You"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

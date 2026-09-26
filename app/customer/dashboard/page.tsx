@@ -39,28 +39,28 @@ export default function CustomerDashboardPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-10">
-      <div className="relative overflow-hidden rounded-[30px] border border-slate-800/70 bg-[radial-gradient(circle_at_top_left,_rgba(14,116,144,0.25),transparent_35%),linear-gradient(135deg,#0f172a_0%,#111827_38%,#0f172a_100%)] px-5 py-6 text-white shadow-[0_35px_80px_-40px_rgba(15,23,42,0.9)] sm:px-7 sm:py-8 lg:px-8 lg:py-9">
+    <div className="mx-auto w-full min-w-0 max-w-7xl overflow-x-clip px-3 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-10">
+      <div className="relative overflow-hidden rounded-[24px] border border-slate-800/70 bg-[radial-gradient(circle_at_top_left,_rgba(14,116,144,0.25),transparent_35%),linear-gradient(135deg,#0f172a_0%,#111827_38%,#0f172a_100%)] px-4 py-6 text-white shadow-[0_35px_80px_-40px_rgba(15,23,42,0.9)] sm:rounded-[30px] sm:px-7 sm:py-8 lg:px-8 lg:py-9">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-primary/30 via-primary/10 to-transparent" />
-        <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-          <div>
+        <div className="relative grid min-w-0 gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div className="min-w-0">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-white/80">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
               Account overview
             </div>
             <p className="text-sm text-white/70">Welcome back,</p>
-            <h1 className="mt-1 font-serif text-3xl tracking-tight text-white sm:text-4xl lg:text-5xl">{name}</h1>
+            <h1 className="mt-1 max-w-full truncate font-serif text-[1.75rem] tracking-tight text-white sm:text-4xl lg:text-5xl">{name}</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-slate-200 sm:text-base">
               Your shipments, updates, and delivery details are all in one place.
             </p>
           </div>
 
-          <form onSubmit={trackSubmit} className="w-full">
+          <form onSubmit={trackSubmit} className="w-full min-w-0">
             <label htmlFor="quick-track" className="mb-2 block text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
               Track a shipment
             </label>
-            <div className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-sm">
-              <Search className="ml-3 h-4 w-4 shrink-0 text-white/60" />
+            <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-sm">
+              <Search className="ml-2 h-4 w-4 shrink-0 text-white/60 sm:ml-3" />
               <input
                 id="quick-track"
                 value={q}
@@ -68,7 +68,7 @@ export default function CustomerDashboardPage() {
                 placeholder="Enter tracking number"
                 className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm text-white outline-none placeholder:text-white/45"
               />
-              <Button type="submit" size="sm" className="rounded-xl bg-white text-slate-950 hover:bg-white/90">
+              <Button type="submit" size="sm" className="shrink-0 rounded-xl bg-white px-3 text-slate-950 hover:bg-white/90 sm:px-4">
                 Track
               </Button>
             </div>
@@ -76,14 +76,14 @@ export default function CustomerDashboardPage() {
         </div>
       </div>
 
-      <section className="grid grid-cols-2 gap-3 py-6 sm:grid-cols-4 sm:gap-4 sm:py-8">
+      <section className="grid min-w-0 grid-cols-2 gap-2.5 py-5 sm:grid-cols-4 sm:gap-4 sm:py-8">
         <KpiCard icon={<Package className="w-5 h-5" />} label="Total Shipments" value={String(stats.total)} tone="bg-primary/10 text-primary" />
         <KpiCard icon={<Truck className="w-5 h-5" />} label="Active" value={String(stats.active)} tone="bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300" />
         <KpiCard icon={<CheckCircle2 className="w-5 h-5" />} label="Delivered" value={String(stats.delivered)} tone="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" />
         <KpiCard icon={<Clock className="w-5 h-5" />} label="Pending" value={String(stats.pending)} tone="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" />
       </section>
 
-      <section className="mb-8 grid gap-4 md:grid-cols-2">
+      <section className="mb-6 grid min-w-0 grid-cols-1 gap-3 sm:mb-8 sm:grid-cols-2 sm:gap-4 md:grid-cols-2">
         <QuickCard
           href="#"
           onClick={(e) => {
@@ -98,35 +98,35 @@ export default function CustomerDashboardPage() {
         <QuickCard href="/customer/shipments" icon={<FolderKanban className="w-5 h-5" />} title="View Shipments" desc="See all shipments" grad="from-amber-500 to-rose-500" />
       </section>
 
-      <section>
-        <div>
-          <Card className="border-border/70 bg-card/85 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.45)] backdrop-blur-sm">
-            <CardHeader className="flex-row items-center justify-between gap-3 pb-4">
-              <CardTitle className="font-serif text-xl sm:text-2xl flex items-center gap-2">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <section className="min-w-0">
+        <div className="min-w-0">
+          <Card className="min-w-0 border-border/70 bg-card/85 shadow-[0_18px_45px_-32px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+            <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 pb-4">
+              <CardTitle className="font-serif text-lg sm:text-2xl flex min-w-0 items-center gap-2">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Activity className="w-4 h-4" />
                 </span>
-                Recent Shipments
+                <span className="truncate">Recent Shipments</span>
               </CardTitle>
-              <Button asChild variant="outline" size="sm" className="rounded-full h-9 px-3">
+              <Button asChild variant="outline" size="sm" className="rounded-full h-9 shrink-0 px-3">
                 <Link href="/customer/shipments">
                   View all <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                 </Link>
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
               {!recentShipments.length ? (
                 <EmptyState icon={<Package className="w-8 h-8" />} title="No shipments yet" subtitle="Shipments are created by the ArcBest team and appear here as soon as they are assigned." />
               ) : (
-                <div className="space-y-3">
+                <div className="min-w-0 space-y-3">
                   {recentShipments.map((s) => (
-                    <Link key={s.id} href={`/customer/shipments/${s.id}`} className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 p-3 transition hover:bg-muted/30 sm:gap-4 sm:p-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Link key={s.id} href={`/customer/shipments/${s.id}`} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-border/60 bg-background/50 p-3 transition hover:bg-muted/30 sm:gap-4 sm:p-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-11 sm:w-11">
                         <Truck className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <span className="font-mono text-[11px] font-semibold tracking-wide text-primary">{s.trackingNumber}<CopyTrackingId value={s.trackingNumber} className="ml-1 !h-5 !w-5 !rounded-md" /></span>
+                        <div className="mb-1 flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2">
+                          <span className="inline-flex min-w-0 max-w-full items-center gap-1 font-mono text-[11px] font-semibold tracking-wide text-primary"><span className="truncate">{s.trackingNumber}</span><CopyTrackingId value={s.trackingNumber} className="ml-1 !h-5 !w-5 shrink-0 !rounded-md" /></span>
                           <StatusBadge status={s.status} className="scale-90 origin-left" />
                         </div>
                         <div className="truncate text-sm text-muted-foreground">
@@ -154,13 +154,13 @@ import React from "react";
 
 function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string; tone: string }) {
   return (
-    <Card className="border border-border/60 bg-card/85 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)]">
-      <CardContent className="pt-5">
-        <div className="mb-3 flex items-center justify-between">
-          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>{icon}</span>
-          <span className="text-2xl font-serif font-semibold text-foreground">{value}</span>
+    <Card className="min-w-0 overflow-hidden border border-border/60 bg-card/85 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)]">
+      <CardContent className="min-w-0 p-3 pt-4 sm:pt-5">
+        <div className="mb-2.5 flex min-w-0 items-center justify-between gap-2">
+          <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${tone}`}>{icon}</span>
+          <span className="min-w-0 truncate text-xl font-serif font-semibold text-foreground sm:text-2xl">{value}</span>
         </div>
-        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+        <p className="truncate text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
       </CardContent>
     </Card>
   );
@@ -168,18 +168,18 @@ function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: s
 
 function QuickCard({ href, icon, title, desc, grad, onClick }: { href: string; icon: React.ReactNode; title: string; desc: string; grad: string; onClick?: (e: React.MouseEvent) => void }) {
   return (
-    <Link href={href} onClick={onClick}>
-      <Card className="group overflow-hidden border border-transparent shadow-[0_18px_35px_-30px_rgba(15,23,42,0.7)] transition hover:-translate-y-0.5 hover:border-white/10">
-        <CardContent className="p-0">
-          <div className={`relative overflow-hidden bg-gradient-to-br ${grad} p-5 text-white`}>
+    <Link href={href} onClick={onClick} className="block min-w-0">
+      <Card className="group min-w-0 overflow-hidden border border-transparent shadow-[0_18px_35px_-30px_rgba(15,23,42,0.7)] transition hover:-translate-y-0.5 hover:border-white/10">
+        <CardContent className="min-w-0 p-0">
+          <div className={`relative min-w-0 overflow-hidden bg-gradient-to-br ${grad} p-4 text-white sm:p-5`}>
             <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
-            <div className="relative flex items-center justify-between">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">{icon}</div>
-              <ArrowRight className="h-5 w-5 opacity-80 transition group-hover:translate-x-1" />
+            <div className="relative flex min-w-0 items-center justify-between gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm sm:h-11 sm:w-11">{icon}</div>
+              <ArrowRight className="h-5 w-5 shrink-0 opacity-80 transition group-hover:translate-x-1" />
             </div>
-            <div className="relative mt-6">
-              <h3 className="font-serif text-xl text-white">{title}</h3>
-              <p className="mt-1 text-sm text-white/80">{desc}</p>
+            <div className="relative mt-5 min-w-0 sm:mt-6">
+              <h3 className="truncate font-serif text-lg text-white sm:text-xl">{title}</h3>
+              <p className="mt-1 truncate text-sm text-white/80">{desc}</p>
             </div>
           </div>
         </CardContent>
@@ -190,10 +190,10 @@ function QuickCard({ href, icon, title, desc, grad, onClick }: { href: string; i
 
 function EmptyState({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border/80 py-10 text-center">
+    <div className="rounded-2xl border border-dashed border-border/80 px-4 py-8 text-center sm:py-10">
       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">{icon}</div>
       <p className="font-medium text-foreground">{title}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+      <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">{subtitle}</p>
     </div>
   );
 }

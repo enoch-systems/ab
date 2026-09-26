@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { BrandLogo } from "@/components/shared/brand-logo";
+import { AuthSuccessOverlay, type AuthOverlayStage } from "@/components/shared/auth-success-overlay";
 import {
   Shield, UserRound, Lock, ArrowRight, Loader2, Eye, EyeOff,
   Package, Globe2, Clock, AlertCircle, ChevronLeft, Activity,
@@ -23,6 +24,8 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [overlayStage, setOverlayStage] = useState<AuthOverlayStage>("working");
 
   const clearError = () => {
     if (error) setError("");
@@ -37,15 +40,19 @@ export default function AdminLoginPage() {
     if (!password) fe.password = "Enter your password.";
     setFieldErrors(fe);
     if (Object.keys(fe).length > 0) return;
+    setOverlayOpen(true);
+    setOverlayStage("working");
     setLoading(true);
     try {
       const result = await adminLogin(email.trim(), password);
       if (result.success) {
+        setOverlayStage("success");
         toast.success("Welcome, Administrator.", {
           description: "Operational control center is now available.",
         });
-        router.replace("/admin");
+        setTimeout(() => router.replace("/admin"), 2300);
       } else {
+        setOverlayOpen(false);
         setError(result.error || "Invalid credentials. Please try again.");
       }
     } finally {
@@ -286,6 +293,13 @@ export default function AdminLoginPage() {
           </section>
         </div>
       </main>
+      <AuthSuccessOverlay
+        open={overlayOpen}
+        stage={overlayStage}
+        kind="admin"
+        email={email.trim() || undefined}
+        onContinue={() => router.replace("/admin")}
+      />
     </div>
   );
 }
