@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
@@ -14,6 +14,7 @@ import {
 import { RouteStatusChip, ShipmentRouteRail } from "@/components/shared/shipment-route-rail";
 import { TrackingTimeline } from "@/components/shared/tracking-timeline";
 import { useLiveNow } from "@/hooks/use-live-now";
+import { useLiveTracking } from "@/hooks/use-live-tracking";
 import { describeEta, describeLastUpdate, routeProgress, scanStats } from "@/lib/shipment-progress";
 import {
   ArrowLeft,
@@ -26,6 +27,7 @@ import {
   Package,
   PackageSearch,
   Share2,
+  Wifi,
 } from "lucide-react";
 import type { Shipment, ShipmentStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -57,13 +59,25 @@ export default function TrackingPage() {
   const shipment = localShipment ?? publicShipment;
 
   /**
-   * Anonymous visitors can't use the realtime channel (RLS keeps shipment rows
-   * private to their owner), so this public page re-polls the read-only
-   * /api/track route every few seconds and refreshes the moment the admin saves
-   * a status change. Signed-in customers skip polling entirely — their snapshot
-   * is kept live by the app-state realtime subscription.
+   * One loader, used for the first paint and for every subsequent realtime
+   * refresh. The public page is served by the service-role-backed /api/track
+   * route, which is what lets an anonymous visitor see a shipment at all.
    */
-  const LOOKUP_POLL_MS = 5_000;
+  const loadPublic = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch(`/api/track/${encodeURIComponent(trackingNumber)}`, {
+        signal,
+        cache: "no-store",
+      });
+      if (!response.ok || signal?.aborted) return;
+      const payload = (await response.json()) as { shipment?: Shipment };
+      if (signal?.aborted) return;
+      setPublicShipment(payload.shipment ?? null);
+    } catch {
+      /* aborted or transient network error — the next refresh retries */
+    }
+  }, [trackingNumber]);
+
   useEffect(() => {
     if (localShipment) {
       setPublicShipment(null);
@@ -71,30 +85,40 @@ export default function TrackingPage() {
       return;
     }
     const controller = new AbortController();
-    const load = async () => {
-      if (controller.signal.aborted) return;
-      try {
-        const response = await fetch(`/api/track/${encodeURIComponent(trackingNumber)}`, { signal: controller.signal });
-        if (!response.ok || controller.signal.aborted) return;
-        const payload = await response.json() as { shipment?: Shipment };
-        if (!controller.signal.aborted) setPublicShipment(payload.shipment ?? null);
-      } catch {
-        /* aborted or transient network error — the next poll retries */
-      }
-    };
     setLookupLoading(true);
-    void load().finally(() => setLookupLoading(false));
-    const intervalId = window.setInterval(() => void load(), LOOKUP_POLL_MS);
-    const onVisibilityChange = () => {
-      if (!document.hidden) void load();
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      controller.abort();
-      window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [trackingNumber, localShipment]);
+    void loadPublic(controller.signal).finally(() => {
+      if (!controller.signal.aborted) setLookupLoading(false);
+    });
+    return () => controller.abort();
+  }, [loadPublic, localShipment]);
+
+  /**
+   * Instant updates for everyone, on any device.
+   *
+   * A database trigger broadcasts a content-free `shipment_changed` signal on
+   * `shipment:<tracking number>` whenever the shipment, one of its scans or one
+   * of its images changes — from the admin console, from an API route, or from a
+   * manual edit in the Supabase dashboard. This page listens and re-reads
+   * /api/track, so a status change lands here in well under a second instead of
+   * waiting for a poll. See supabase/migrations/20250926000026_realtime_broadcast.sql.
+   *
+   * `useLiveTracking` also runs a slow backstop poll and refreshes on tab focus,
+   * so the page can never sit stale even if the socket or the trigger is
+   * unavailable.
+   */
+  const { status: liveStatus, lastEventAt } = useLiveTracking({
+    trackingNumber,
+    onInvalidate: () => void loadPublic(),
+  });
+
+  /** Flash the "updated just now" pulse right after a live push lands. */
+  const [justUpdated, setJustUpdated] = useState(false);
+  useEffect(() => {
+    if (lastEventAt === null) return;
+    setJustUpdated(true);
+    const id = window.setTimeout(() => setJustUpdated(false), 4000);
+    return () => window.clearTimeout(id);
+  }, [lastEventAt]);
   const headline = useMemo(
     () => (shipment ? HEADLINES[shipment.status] : null),
     [shipment]
@@ -231,6 +255,43 @@ export default function TrackingPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Connection state, so "nothing changed" is visibly different from
+                "the live connection dropped". Pulses briefly on each push. */}
+            <span
+              title={
+                liveStatus === "live"
+                  ? "Live — updates the moment this shipment changes"
+                  : liveStatus === "polling"
+                    ? "Reconnecting — checking for updates periodically"
+                    : liveStatus === "offline"
+                      ? "Offline — retrying automatically"
+                      : "Connecting…"
+              }
+              className={cn(
+                "flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-[10px] font-semibold",
+                liveStatus === "live"
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+                  : liveStatus === "polling"
+                    ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300"
+                    : "border-border bg-muted/40 text-muted-foreground"
+              )}
+            >
+              <span className="relative flex h-1.5 w-1.5">
+                {liveStatus === "live" && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                )}
+                <span
+                  className={cn(
+                    "relative inline-flex h-1.5 w-1.5 rounded-full",
+                    liveStatus === "live" ? "bg-emerald-500" : liveStatus === "polling" ? "bg-amber-500" : "bg-muted-foreground/50"
+                  )}
+                />
+              </span>
+              <Wifi className="h-3 w-3" />
+              <span className="hidden sm:inline">
+                {justUpdated ? "Updated now" : liveStatus === "live" ? "Live" : liveStatus === "polling" ? "Reconnecting" : "Offline"}
+              </span>
+            </span>
             <button onClick={copy} aria-label="Copy" className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card active:bg-muted">
               {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
             </button>

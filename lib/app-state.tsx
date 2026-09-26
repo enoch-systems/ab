@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js';
 import type { Customer, Shipment, ShipmentImage, Notification, SupportMessage, Activity, ActivityType, Session, ShipmentStatus, Address, ShippingMethod, PackageType, NotificationType, AdminProfile, TrackingEvent } from './types';
 import { formatLongDate, formatTime } from './date-format';
 import { getSupabaseBrowser } from './supabase/client';
+import { broadcastShipmentChange } from './supabase/broadcast';
 import { addressToJson, activityToModel, notificationToModel, profileToAdmin } from './supabase/mappers';
 import { fetchAppData } from './supabase/data';
 import type { Database } from './supabase/database.types';
@@ -451,6 +452,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   // active we subscribe and re-pull the (RLS-scoped) snapshot whenever a row
   // changes, so every signed-in surface — admin consoles and the customer's
   // /track page alike — updates on its own, without a reload or manual refetch.
+  //
+  // The re-pull is deliberately debounced: a single admin status change writes
+  // the shipments row plus several tracking_events rows plus a notification, and
+  // each one fires its own event. Collapsing them into one refresh keeps the UI
+  // from flickering through intermediate states.
   useEffect(() => {
     const client = getSupabaseBrowser();
     if (!client || !session) return;
@@ -476,19 +482,38 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     const scheduleRefresh = () => {
       if (refreshScheduled) return;
       refreshScheduled = true;
-      window.setTimeout(() => void refreshSnapshot(), 800);
+      window.setTimeout(() => void refreshSnapshot(), 300);
     };
 
     const channel = client
       .channel('app-state-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments' }, scheduleRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tracking_events' }, scheduleRefresh)
+      // Product/packing images live in their own table, so an upload only
+      // reaches every other open device once we subscribe to it as well.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipment_images' }, scheduleRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, scheduleRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'activities' }, scheduleRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, scheduleRefresh)
-      .subscribe();
+      .subscribe((state) => {
+        // Re-pull as soon as the socket (re)connects so anything that changed
+        // while this device was offline or backgrounded is picked up.
+        if (state === 'SUBSCRIBED') scheduleRefresh();
+      });
+
+    // Catches up immediately when the operator returns to this tab — the case
+    // where a backgrounded tab is most visibly out of date.
+    const onWake = () => {
+      if (document.visibilityState === 'visible') scheduleRefresh();
+    };
+    document.addEventListener('visibilitychange', onWake);
+    window.addEventListener('online', onWake);
+    window.addEventListener('focus', onWake);
 
     return () => {
+      document.removeEventListener('visibilitychange', onWake);
+      window.removeEventListener('online', onWake);
+      window.removeEventListener('focus', onWake);
       void client.removeChannel(channel);
     };
   }, [session]);
@@ -769,6 +794,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       reference_id: trackingNumber,
     });
 
+    // The shipment, its first scan and its images now all exist, so anyone who
+    // already has this tracking number open (a shared link, say) sees the full
+    // result — pictures included — straight away.
+    void broadcastShipmentChange(client, trackingNumber, 'created');
+
     if (typeof window !== 'undefined') {
       void fetch('/api/notifications/shipment-created', {
         method: 'POST',
@@ -942,6 +972,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
       // 3 · Audit trail + customer notification. Best-effort: a failed
       //    side-effect must never roll back the status change itself.
+      //
+      //    Announce last: by now the row writes have committed, so anyone
+      //    listening on the public tracking page re-reads fresh data instead of
+      //    racing this broadcast. The database trigger covers the same change;
+      //    this just removes the round-trip delay.
+      void broadcastShipmentChange(client, shipment.trackingNumber, 'status');
+
       const addDbActivity = async (type: ActivityType, actor: string, action: string, details?: string): Promise<Activity | null> => {
         const { data, error } = await client
           .from('activities')
@@ -1036,6 +1073,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     const client = getSupabaseBrowser();
     if (client && session?.role === 'admin') {
       void client.from('shipments').update({ destination, recipient: addressToJson(updated.recipient), current_location: currentLocation, last_updated: timestamp }).eq('id', shipmentId);
+      // Tell any open tracking page that the map/route just moved.
+      void broadcastShipmentChange(client, shipment.trackingNumber, 'location');
     }
 
     setState((prev) => {
