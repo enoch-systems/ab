@@ -8,6 +8,7 @@ import { LenisProvider } from '@/components/providers/lenis-provider'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '@/components/providers/theme-provider'
 import { AppStateProvider } from '@/lib/app-state'
 import { BRAND_LOGO_URL } from '@/components/shared/brand-logo'
+import { COMPANY_ADDRESS, COMPANY_MAPS_URL } from '@/lib/site'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -19,6 +20,34 @@ export const metadata: Metadata = {
     icon: BRAND_LOGO_URL,
     apple: BRAND_LOGO_URL,
   },
+}
+
+/**
+ * LocalBusiness structured data.
+ *
+ * Keeps the headquarters address in one place with the rendered copy: the
+ * JSON-LD `PostalAddress` below is built from the same COMPANY_ADDRESS constant
+ * the footer and contact page display, so a pin move can never leave search
+ * engines showing a stale address. `hasMap` points at the same short Maps URL
+ * the "View in Maps" links use.
+ */
+const localBusinessJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LogisticsBusiness',
+  name: 'ArcBest Logistics LLC',
+  url: 'https://arcbest.com',
+  logo: BRAND_LOGO_URL,
+  telephone: '+1-800-555-0147',
+  email: 'support@arcbest.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: COMPANY_ADDRESS.street,
+    addressLocality: COMPANY_ADDRESS.city,
+    addressRegion: COMPANY_ADDRESS.regionCode,
+    postalCode: COMPANY_ADDRESS.postalCode,
+    addressCountry: COMPANY_ADDRESS.countryCode,
+  },
+  hasMap: COMPANY_MAPS_URL,
 }
 
 export const viewport: Viewport = {
@@ -60,6 +89,12 @@ export default function RootLayout({
             effect: by the time any `useEffect` runs, the browser has already
             painted the wrong theme. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Machine-readable headquarters address, built from the same constants
+            as the visible footer/contact copy. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+        />
       </head>
       {/* Horizontal panning is clipped on `html`/`body` in globals.css, so no
           per-element overflow guard is needed here (and `overflow-x-hidden`

@@ -3,10 +3,11 @@
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
-import { Phone, Mail, MapPin, ChevronRight } from "lucide-react"
+import { Phone, Mail, MapPin, ChevronRight, ExternalLink } from "lucide-react"
 import { useAppState } from "@/lib/app-state"
 import { PolicyModal } from "@/components/shared/policy-modal"
 import { BrandLogo } from "@/components/shared/brand-logo"
+import { COMPANY_ADDRESS_LINE, COMPANY_MAPS_URL } from "@/lib/site"
 
 const footerLinks = {
   company: [
@@ -76,7 +77,21 @@ export function Footer() {
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-                <span>100 Market Street, New York, NY 10001</span>
+                <address className="not-italic">
+                  <a
+                    href={COMPANY_MAPS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-block hover:text-primary boty-transition"
+                    aria-label={`View ${COMPANY_ADDRESS_LINE} in Google Maps (opens in a new tab)`}
+                  >
+                    <span>{COMPANY_ADDRESS_LINE}</span>
+                    <span className="mt-0.5 flex items-center gap-1 text-[13px] font-medium text-primary">
+                      View in Maps
+                      <ExternalLink className="h-3 w-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </span>
+                  </a>
+                </address>
               </div>
             </div>
           </FooterReveal>

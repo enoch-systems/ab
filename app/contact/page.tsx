@@ -2,10 +2,11 @@
 
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Headphones } from "lucide-react"
+import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Headphones, ExternalLink } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { openLiveChat, LiveChatWidget } from "@/components/shared/live-chat"
+import { COMPANY_MAPS_URL } from "@/lib/site"
 
 const contactChannels = [
   {
@@ -32,9 +33,11 @@ const contactChannels = [
   {
     name: "Head Office",
     icon: MapPin,
-    primary: "New York · United States",
-    secondary: "100 Market Street",
-    href: "#",
+    primary: "Fort Smith · United States",
+    secondary: "8401 McClure Dr, AR 72916",
+    href: COMPANY_MAPS_URL,
+    external: true,
+    action: "View in Maps",
   },
 ]
 
@@ -80,7 +83,13 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-1">{ch.name}</h3>
                   <p className="font-serif text-lg font-semibold text-foreground mb-1">{ch.primary}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Clock className="w-3 h-3" /> {ch.secondary}</p>
+                  {/* The office card is a place, not a service window — it shows
+                      the street address plus a maps link instead of a clock. */}
+                  {ch.action ? (
+                    <p className="text-xs text-muted-foreground">{ch.secondary}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Clock className="w-3 h-3" /> {ch.secondary}</p>
+                  )}
                 </>
               )
 
@@ -101,9 +110,16 @@ export default function ContactPage() {
                 <a
                   key={ch.name}
                   href={ch.href}
+                  {...(ch.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   className="bg-card rounded-2xl border border-border p-6 logix-shadow boty-transition hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10"
                 >
                   {content}
+                  {ch.action && (
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                      {ch.action}
+                      <ExternalLink className="h-3 w-3" />
+                    </span>
+                  )}
                 </a>
               )
             })}
