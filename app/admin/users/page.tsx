@@ -6,6 +6,8 @@ import { useAppState } from "@/lib/app-state";
 import { formatCurrency, formatDate } from "@/components/shared/status-badge";
 import type { Customer } from "@/lib/types";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { AdminSearch } from "@/components/shared/admin/admin-search";
 import { AdminMiniStat } from "@/components/shared/admin/admin-stat";
 import {
@@ -88,8 +90,8 @@ export default function AdminUsersPage() {
           placeholder="Search name, email, phone, city…"
           className="sm:max-w-md w-full"
         />
-        <p className="text-xs sm:text-sm text-muted-foreground sm:text-right">
-          <span className="text-foreground font-semibold">{list.length}</span> users
+        <p className={cn(ADMIN_TYPE.meta, "sm:text-right")}>
+          <span className="font-semibold text-foreground">{list.length}</span> users
         </p>
       </div>
 
@@ -98,19 +100,19 @@ export default function AdminUsersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border/60 bg-muted/20 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-            <th className="text-left font-medium px-5 py-3.5">User</th>
-                <th className="text-left font-medium px-5 py-3.5">Contact</th>
-                <th className="text-left font-medium px-5 py-3.5">Location</th>
-                <th className="text-left font-medium px-5 py-3.5">Shipments</th>
-                <th className="text-left font-medium px-5 py-3.5">Registered</th>
-                <th className="text-left font-medium px-5 py-3.5">Last Active</th>
-                <th className="text-left font-medium px-5 py-3.5">Status</th>
+              <tr className={cn("border-b border-border/60 bg-muted/20", ADMIN_TYPE.labelMicro)}>
+            <th className="text-left px-5 py-3.5">User</th>
+                <th className="text-left px-5 py-3.5">Contact</th>
+                <th className="text-left px-5 py-3.5">Location</th>
+                <th className="text-left px-5 py-3.5">Shipments</th>
+                <th className="text-left px-5 py-3.5">Registered</th>
+                <th className="text-left px-5 py-3.5">Last Active</th>
+                <th className="text-left px-5 py-3.5">Status</th>
               </tr>
             </thead>
             <tbody>
               {!list.length && (
-                <tr><td colSpan={7} className="h-40 text-center text-sm text-muted-foreground">No users match.</td></tr>
+                <tr><td colSpan={7} className={cn(ADMIN_TYPE.meta, "h-40 text-center")}>No users match.</td></tr>
               )}
               {visibleList.map((c) => (
                 <UserRow key={c.id} c={c} count={counts[c.id] || 0} onClick={() => router.push(`/admin/users/${c.id}`)} />
@@ -123,7 +125,7 @@ export default function AdminUsersPage() {
       {/* Mobile user cards */}
       <div className="lg:hidden space-y-2.5">
         {!list.length && (
-          <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+          <div className={cn("rounded-2xl border border-border bg-card p-10 text-center", ADMIN_TYPE.meta)}>
             No users match your search.
           </div>
         )}
@@ -142,8 +144,8 @@ export default function AdminUsersPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate leading-tight">{c.fullName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{c.email}</p>
+                      <p className={cn(ADMIN_TYPE.value, "truncate")}>{c.fullName}</p>
+                      <p className={cn(ADMIN_TYPE.secondary, "truncate")}>{c.email}</p>
                     </div>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${
                       c.accountStatus === "Active"
@@ -156,11 +158,11 @@ export default function AdminUsersPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                  <div className={cn(ADMIN_TYPE.secondary, "flex items-center gap-1.5 mt-1.5")}>
                     <Phone className="w-3 h-3 shrink-0" />
                     <span className="truncate">{c.phone}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                  <div className={cn(ADMIN_TYPE.secondary, "flex items-center gap-1.5 mt-1")}>
                     <MapPin className="w-3 h-3 shrink-0" />
                     <span className="truncate">{c.city}, {c.country}</span>
                   </div>
@@ -185,7 +187,7 @@ export default function AdminUsersPage() {
 
       {list.length > 0 && (
         <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-          <p className="text-xs text-muted-foreground sm:text-sm">
+          <p className={ADMIN_TYPE.meta}>
             Showing <span className="font-semibold text-foreground">{firstResult}–{lastResult}</span> of{" "}
             <span className="font-semibold text-foreground">{list.length}</span> users
           </p>
@@ -236,8 +238,8 @@ function MiniStat({ label, value, tone, icon }: { label: string; value: string; 
       <div className="flex items-center gap-2.5 mb-2">
         <div className={`w-8 h-8 rounded-lg inline-flex items-center justify-center ${tone}`}>{icon}</div>
       </div>
-      <p className="text-xl sm:text-[22px] font-serif font-semibold tracking-tight leading-none mb-1 truncate">{value}</p>
-      <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className={cn(ADMIN_TYPE.statValue, "text-xl mb-1 truncate sm:text-[22px]")}>{value}</p>
+      <p className={ADMIN_TYPE.label}>{label}</p>
     </div>
   );
 }
@@ -245,8 +247,8 @@ function MiniStat({ label, value, tone, icon }: { label: string; value: string; 
 function InfoCell({ label, value, align = "left" }: { label: string; value: string; align?: "left" | "right" }) {
   return (
     <div className={align === "right" ? "text-right" : ""}>
-      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground mb-0.5">{label}</p>
-      <p className="text-xs font-semibold truncate">{value}</p>
+      <p className={cn(ADMIN_TYPE.labelMicro, "mb-0.5")}>{label}</p>
+      <p className={cn(ADMIN_TYPE.valueSmall, "font-semibold truncate")}>{value}</p>
     </div>
   );
 }
@@ -263,28 +265,28 @@ function UserRow({ c, count, onClick }: { c: Customer; count: number; onClick: (
             {c.fullName[0]}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold truncate leading-tight">{c.fullName}</p>
-            <p className="text-xs text-muted-foreground truncate">{c.email}</p>
+            <p className={cn(ADMIN_TYPE.value, "truncate")}>{c.fullName}</p>
+            <p className={cn(ADMIN_TYPE.secondary, "truncate")}>{c.email}</p>
           </div>
         </div>
       </td>
       <td className="px-5 py-3.5">
-        <div className="text-sm space-y-0.5">
+        <div className={cn(ADMIN_TYPE.valueSmall, "space-y-0.5")}>
           <div className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-muted-foreground shrink-0" />{c.email}</div>
           <div className="flex items-center gap-1.5 text-muted-foreground"><Phone className="w-3.5 h-3.5 shrink-0" />{c.phone}</div>
         </div>
       </td>
       <td className="px-5 py-3.5">
-        <div className="flex items-start gap-1.5 text-sm"><MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" /><span className="truncate">{c.city}, {c.state}, {c.country}</span></div>
+        <div className={cn(ADMIN_TYPE.valueSmall, "flex items-start gap-1.5")}><MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" /><span className="truncate">{c.city}, {c.state}, {c.country}</span></div>
       </td>
       <td className="px-5 py-3.5">
-        <div className="inline-flex items-center gap-1.5 font-medium">
+        <div className={cn(ADMIN_TYPE.valueSmall, "inline-flex items-center gap-1.5")}>
           <Package className="w-4 h-4 text-primary" />
           <span>{count}</span>
         </div>
       </td>
-      <td className="px-5 py-3.5 text-muted-foreground text-sm">{formatDate(c.createdAt)}</td>
-      <td className="px-5 py-3.5 text-muted-foreground text-sm">{formatDate(c.lastActive)}</td>
+      <td className={cn("px-5 py-3.5 text-[13px] text-muted-foreground")}>{formatDate(c.createdAt)}</td>
+      <td className={cn("px-5 py-3.5 text-[13px] text-muted-foreground")}>{formatDate(c.lastActive)}</td>
       <td className="px-5 py-3.5">
         <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${c.accountStatus === "Active" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/15 text-rose-600 dark:text-rose-400"}`}>
           {c.accountStatus}

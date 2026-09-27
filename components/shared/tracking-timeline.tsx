@@ -1,6 +1,7 @@
 import { Check, Circle, AlertTriangle } from 'lucide-react';
 import type { Shipment } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { ADMIN_TYPE } from '@/components/shared/admin/admin-type';
 
 interface TrackingTimelineProps {
   events: Shipment['trackingEvents'];
@@ -78,7 +79,8 @@ export function TrackingTimeline({ events, className, animate, flashIds }: Track
                   <div className="flex flex-wrap items-center gap-2">
                     <h4
                       className={cn(
-                        'font-semibold text-sm sm:text-base',
+                        ADMIN_TYPE.valueSmall,
+                        'font-semibold sm:text-sm',
                         ev.state === 'upcoming' ? 'text-muted-foreground' : 'text-foreground',
                         isException && 'text-rose-600 dark:text-rose-400',
                       )}
@@ -88,7 +90,7 @@ export function TrackingTimeline({ events, className, animate, flashIds }: Track
                     {ev.state === 'current' && (
                       <span
                         className={cn(
-                          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]',
+                          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]',
                           isException
                             ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
                             : 'bg-primary/10 text-primary',
@@ -104,17 +106,17 @@ export function TrackingTimeline({ events, className, animate, flashIds }: Track
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{ev.location}</p>
+                  <p className={cn(ADMIN_TYPE.secondary, "mt-1 sm:text-[13px]")}>{ev.location}</p>
                 </div>
                 {(ev.date || ev.time) && (
-                  <div className="max-w-full text-right text-xs text-muted-foreground sm:text-sm sm:whitespace-nowrap">
+                  <div className={cn(ADMIN_TYPE.help, "max-w-full text-right sm:whitespace-nowrap")}>
                     {ev.date && <span className="block">{ev.date}</span>}
-                    {ev.time && <span className="block text-[11px] sm:text-xs">{ev.time}</span>}
+                    {ev.time && <span className={cn(ADMIN_TYPE.help, "block")}>{ev.time}</span>}
                   </div>
                 )}
               </div>
               {ev.description && (
-                <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">{ev.description}</p>
+                <p className={cn(ADMIN_TYPE.secondary, "mt-2 sm:text-[13px]")}>{ev.description}</p>
               )}
             </div>
           </li>

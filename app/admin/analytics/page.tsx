@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { StatusBadge, formatCurrency } from "@/components/shared/status-badge";
 import type { ShipmentStatus, ShippingMethod } from "@/lib/types";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import {
   LineChart,
   Line,
@@ -391,18 +393,18 @@ export default function AdminAnalyticsPage() {
             ))}
             <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border/60">
               <div className="rounded-xl border bg-muted/20 p-3">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+                <p className={ADMIN_TYPE.labelMicro}>
                   Delayed
                 </p>
-                <p className="font-serif text-xl sm:text-2xl font-semibold mt-0.5 leading-tight">
+                <p className={cn(ADMIN_TYPE.statValue, "text-xl mt-0.5 leading-tight sm:text-2xl")}>
                   {Math.max(0, shipments.length - s.delivered - s.exception) - s.active}
                 </p>
               </div>
               <div className="rounded-xl border bg-muted/20 p-3">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+                <p className={ADMIN_TYPE.labelMicro}>
                   Exceptions
                 </p>
-                <p className="font-serif text-xl sm:text-2xl font-semibold mt-0.5 leading-tight">
+                <p className={cn(ADMIN_TYPE.statValue, "text-xl mt-0.5 leading-tight sm:text-2xl")}>
                   {s.exception}
                 </p>
               </div>
@@ -589,10 +591,10 @@ function Kpi({
             </span>
           )}
         </div>
-        <p className="text-xl sm:text-2xl lg:text-3xl font-serif font-semibold tracking-tight leading-tight truncate">
+        <p className={cn(ADMIN_TYPE.statValue, "text-xl leading-tight sm:text-2xl lg:text-3xl truncate")}>
           {value}
         </p>
-        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mt-1 truncate">
+        <p className={cn(ADMIN_TYPE.label, "mt-1 truncate")}>
           {label}
         </p>
       </CardContent>
@@ -616,10 +618,10 @@ function MiniKpi({
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-lg sm:text-xl font-serif font-semibold leading-none truncate">
+          <p className={cn(ADMIN_TYPE.statValue, "text-lg sm:text-xl truncate")}>
             {value}
           </p>
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mt-1 truncate">
+          <p className={cn(ADMIN_TYPE.label, "mt-1 truncate")}>
             {label}
           </p>
         </div>
@@ -649,11 +651,11 @@ function ChartCard({
             {icon}
           </span>
           <div className="min-w-0 flex-1">
-            <CardTitle className="font-serif text-base sm:text-lg truncate">
+            <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "sm:text-lg truncate")}>
               {title}
             </CardTitle>
             {subtitle && (
-              <CardDescription className="mt-0.5 text-xs sm:text-sm truncate">
+              <CardDescription className={cn(ADMIN_TYPE.secondary, "mt-0.5 truncate")}>
                 {subtitle}
               </CardDescription>
             )}

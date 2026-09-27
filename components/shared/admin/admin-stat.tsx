@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 
 interface AdminStatCardProps {
   label: string;
@@ -45,11 +46,11 @@ export function AdminStatCard({
         </span>
         {href && <ArrowRight className="w-4 h-4 opacity-60 group-hover:translate-x-0.5 group-hover:opacity-100 transition shrink-0 mt-1" />}
       </div>
-      <p className="text-2xl sm:text-[26px] font-serif font-bold tracking-tight leading-none mb-1.5 truncate">{value}</p>
-      <p className={cn("text-[11px] font-semibold uppercase tracking-[0.12em]", solid ? "opacity-90" : "text-muted-foreground")}>
+      <p className={cn(ADMIN_TYPE.statValue, "sm:text-[26px] mb-1.5 truncate")}>{value}</p>
+      <p className={cn(ADMIN_TYPE.label, solid && "text-white/85")}>
         {label}
       </p>
-      {sub && <p className={cn("text-[11px] mt-1.5 leading-snug", solid ? "opacity-80" : "text-muted-foreground/90")}>{sub}</p>}
+      {sub && <p className={cn(ADMIN_TYPE.help, "mt-1.5", solid && "text-white/75")}>{sub}</p>}
     </div>
   );
 
@@ -92,8 +93,8 @@ export function AdminMiniStat({ label, value, icon, tone = "bg-primary/10 text-p
     <div className={cn("rounded-2xl border border-border bg-card p-3 sm:p-3.5 flex items-center gap-2.5 sm:gap-3 min-w-0", className)}>
       {icon && <span className={cn("inline-flex w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl items-center justify-center shrink-0", tone)}>{icon}</span>}
       <div className="min-w-0 flex-1">
-        <p className="text-lg sm:text-xl font-serif font-semibold leading-none truncate">{value}</p>
-        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mt-1 truncate">{label}</p>
+        <p className={cn(ADMIN_TYPE.statValue, "text-lg sm:text-xl truncate")}>{value}</p>
+        <p className={cn(ADMIN_TYPE.labelMicro, "mt-1 truncate")}>{label}</p>
       </div>
     </div>
   );

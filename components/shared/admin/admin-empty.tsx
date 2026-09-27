@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 
 interface AdminEmptyProps {
   icon?: React.ReactNode;
@@ -18,8 +19,8 @@ export function AdminEmpty({ icon, title, hint, action, className }: AdminEmptyP
           {icon}
         </div>
       )}
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      {hint && <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">{hint}</p>}
+      <p className={ADMIN_TYPE.value}>{title}</p>
+      {hint && <p className={cn(ADMIN_TYPE.secondary, "mt-1.5 max-w-xs")}>{hint}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

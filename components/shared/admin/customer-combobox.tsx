@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpDown, Check, ChevronsUpDown, MapPin, Search, UserRound, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { ADMIN_TYPE } from '@/components/shared/admin/admin-type';
 import type { Customer } from '@/lib/types';
 
 type SortMode = 'newest' | 'oldest' | 'name';
@@ -206,7 +207,7 @@ export function CustomerCombobox({ customers, value, onChange, selected, id = 'c
         <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
           <div className="flex items-center gap-1.5 overflow-x-auto border-b px-2 py-2">
             <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="mr-1 shrink-0 text-[11px] font-medium text-muted-foreground">Sort</span>
+            <span className={cn(ADMIN_TYPE.help, "mr-1 shrink-0")}>Sort</span>
             {SORTS.map((option) => (
               <button
                 key={option.id}
@@ -222,7 +223,7 @@ export function CustomerCombobox({ customers, value, onChange, selected, id = 'c
                 {option.label}
               </button>
             ))}
-            <span className="ml-auto shrink-0 pl-2 text-[11px] text-muted-foreground">
+            <span className={cn(ADMIN_TYPE.help, "ml-auto shrink-0 pl-2")}>
               {results.length}/{customers.length}
             </span>
           </div>
@@ -276,7 +277,7 @@ export function CustomerCombobox({ customers, value, onChange, selected, id = 'c
                         <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                           <Highlight text={item.email} query={query} />
                         </span>
-                        <span className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <span className={cn(ADMIN_TYPE.help, "mt-0.5 flex items-center gap-2")}>
                           {item.city ? (
                             <span className="inline-flex min-w-0 items-center gap-1">
                               <MapPin className="h-3 w-3 shrink-0" />

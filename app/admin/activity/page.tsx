@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDateTime } from "@/components/shared/status-badge";
 import type { ActivityType } from "@/lib/types";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { AdminSearch } from "@/components/shared/admin/admin-search";
 import {
   Shield,
@@ -254,10 +256,10 @@ export default function AdminActivityPage() {
               <ActivityIcon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <CardTitle className="font-serif text-base sm:text-lg truncate">
+              <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "sm:text-lg truncate")}>
                 Event Feed
               </CardTitle>
-              <CardDescription className="mt-0.5 text-xs sm:text-sm truncate">
+              <CardDescription className={cn(ADMIN_TYPE.secondary, "mt-0.5 truncate")}>
                 {list.length} matching events · chronological
               </CardDescription>
             </div>
@@ -274,10 +276,10 @@ export default function AdminActivityPage() {
                     <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
                       <ActivityIcon className="w-7 h-7 text-muted-foreground/70" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className={ADMIN_TYPE.value}>
                       No matching events
                     </p>
-                    <p className="text-xs text-muted-foreground/70 mt-1 max-w-xs mx-auto">
+                    <p className={cn(ADMIN_TYPE.secondary, "mt-1.5 max-w-xs mx-auto")}>
                       Try clearing your search or changing the active filter.
                     </p>
                   </div>
@@ -306,25 +308,25 @@ export default function AdminActivityPage() {
                         <div className="flex flex-wrap items-start justify-between gap-2 mb-1">
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
                             <p
-                              className={`text-[13px] sm:text-sm font-semibold leading-snug ${tone.text}`}
+                              className={cn(ADMIN_TYPE.valueSmall, "font-semibold sm:text-sm", tone.text)}
                             >
                               {a.action}
                             </p>
-                            <span className="text-[12px] text-muted-foreground inline-flex items-center gap-1">
-                              <span className="text-[10px] opacity-60">by</span>
+                            <span className={cn(ADMIN_TYPE.secondary, "inline-flex items-center gap-1")}>
+                              <span className="text-[10px]">by</span>
                               <span className="font-semibold text-foreground truncate">
                                 {a.actor}
                               </span>
                             </span>
                           </div>
-                          <div className="flex max-w-full items-center justify-end gap-1.5 text-[11px] text-muted-foreground sm:whitespace-nowrap">
+                          <div className={cn(ADMIN_TYPE.help, "flex max-w-full items-center justify-end gap-1.5 sm:whitespace-nowrap")}>
                             <Clock className="w-3.5 h-3.5 shrink-0" />
                             {formatDateTime(a.timestamp)}
                           </div>
                         </div>
 
                         {a.details && (
-                          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 leading-snug">
+                          <p className={cn(ADMIN_TYPE.secondary, "mt-0.5 sm:mt-1 sm:text-[13px]")}>
                             {a.details}
                           </p>
                         )}

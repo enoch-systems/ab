@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { StatusBadge, formatCurrency, formatDate, formatDateTime } from "@/components/shared/status-badge";
 import { CopyTrackingId } from "@/components/shared/copy-tracking-id";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -41,8 +43,8 @@ export default function AdminUserDetailPage() {
             <div className="w-14 h-14 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-4">
               <Users className="w-7 h-7 text-muted-foreground" />
             </div>
-            <h1 className="font-serif text-2xl mb-2">User Not Found</h1>
-            <p className="text-muted-foreground text-sm mb-5">
+            <h1 className={cn(ADMIN_TYPE.pageTitle, "mb-2")}>User Not Found</h1>
+            <p className={cn(ADMIN_TYPE.meta, "mb-5")}>
               This customer does not exist or has been removed.
             </p>
             <Button asChild variant="outline" className="rounded-full h-11">
@@ -59,7 +61,7 @@ export default function AdminUserDetailPage() {
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 pb-10 sm:pb-14">
       {/* Breadcrumbs */}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4 mt-1">
+      <div className={cn(ADMIN_TYPE.help, "flex items-center gap-1.5 mb-4 mt-1")}>
         <Link href="/admin" className="hover:text-foreground transition">
           Dashboard
         </Link>
@@ -68,7 +70,7 @@ export default function AdminUserDetailPage() {
           Users
         </Link>
         <ChevronRight className="w-3 h-3" />
-        <span className="text-foreground truncate">{c.fullName}</span>
+        <span className="font-semibold text-foreground truncate">{c.fullName}</span>
       </div>
 
       {/* Header / identity card */}
@@ -87,7 +89,7 @@ export default function AdminUserDetailPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl tracking-tight leading-tight truncate">
+                    <h1 className={cn(ADMIN_TYPE.pageTitle, "lg:text-3xl truncate")}>
                       {c.fullName}
                     </h1>
                     <span
@@ -100,8 +102,8 @@ export default function AdminUserDetailPage() {
                       {c.accountStatus}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate mb-1">{c.email}</p>
-                  <div className="flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
+                  <p className={cn(ADMIN_TYPE.secondary, "truncate mb-1")}>{c.email}</p>
+                  <div className={cn(ADMIN_TYPE.secondary, "flex flex-wrap items-center gap-3")}>
                     <span className="inline-flex items-center gap-1.5">
                       <Phone className="w-3 h-3 shrink-0" />
                       <span className="truncate">{c.phone}</span>
@@ -226,18 +228,18 @@ export default function AdminUserDetailPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tracking</TableHead>
-                      <TableHead>Route</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="text-right">Cost</TableHead>
+                      <TableHead className={ADMIN_TYPE.labelMicro}>Tracking</TableHead>
+                      <TableHead className={ADMIN_TYPE.labelMicro}>Route</TableHead>
+                      <TableHead className={ADMIN_TYPE.labelMicro}>Status</TableHead>
+                      <TableHead className={ADMIN_TYPE.labelMicro}>Method</TableHead>
+                      <TableHead className={ADMIN_TYPE.labelMicro}>Created</TableHead>
+                      <TableHead className={cn(ADMIN_TYPE.labelMicro, "text-right")}>Cost</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {!userShipments.length && (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground text-sm">
+                        <TableCell colSpan={6} className={cn(ADMIN_TYPE.meta, "h-32 text-center")}>
                           No shipments yet for this customer.
                         </TableCell>
                       </TableRow>
@@ -258,9 +260,9 @@ export default function AdminUserDetailPage() {
                         <TableCell>
                           <StatusBadge status={s.status} />
                         </TableCell>
-                        <TableCell className="text-sm">{s.shippingMethod}</TableCell>
-                        <TableCell className="text-sm">{formatDate(s.createdAt)}</TableCell>
-                        <TableCell className="text-right text-sm font-medium">
+                        <TableCell className={cn("text-[13px] text-muted-foreground")}>{s.shippingMethod}</TableCell>
+                        <TableCell className={cn("text-[13px] text-muted-foreground")}>{formatDate(s.createdAt)}</TableCell>
+                        <TableCell className={cn(ADMIN_TYPE.valueSmall, "text-right font-semibold")}>
                           {formatCurrency(s.cost, s.currency)}
                         </TableCell>
                       </TableRow>
@@ -272,7 +274,7 @@ export default function AdminUserDetailPage() {
               {/* Mobile cards */}
               <div className="lg:hidden divide-y divide-border/60">
                 {!userShipments.length && (
-                  <div className="p-8 sm:p-10 text-center text-muted-foreground text-sm">
+                  <div className={cn(ADMIN_TYPE.meta, "p-8 text-center sm:p-10")}>
                     No shipments yet.
                   </div>
                 )}
@@ -290,30 +292,30 @@ export default function AdminUserDetailPage() {
                       </div>
                       <StatusBadge status={s.status} />
                     </div>
-                    <div className="flex items-center gap-2 text-sm mb-2">
+                    <div className={cn(ADMIN_TYPE.value, "flex items-center gap-2 mb-2")}>
                       <Globe2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="truncate font-medium">
+                      <span className="truncate">
                         {s.origin.split(",")[0]} → {s.destination.split(",")[0]}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-3">
+                    <div className={cn(ADMIN_TYPE.help, "grid grid-cols-2 gap-2 sm:grid-cols-3")}>
                       <div>
-                        <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                        <p className={ADMIN_TYPE.labelMicro}>
                           Method
                         </p>
-                        <p className="font-semibold mt-0.5 text-foreground">{s.shippingMethod}</p>
+                        <p className={cn(ADMIN_TYPE.valueSmall, "mt-0.5")}>{s.shippingMethod}</p>
                       </div>
                       <div>
-                        <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                        <p className={ADMIN_TYPE.labelMicro}>
                           Created
                         </p>
-                        <p className="font-semibold mt-0.5 text-foreground">{formatDate(s.createdAt)}</p>
+                        <p className={cn(ADMIN_TYPE.valueSmall, "mt-0.5")}>{formatDate(s.createdAt)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                        <p className={ADMIN_TYPE.labelMicro}>
                           Cost
                         </p>
-                        <p className="font-semibold mt-0.5 text-primary">
+                        <p className={cn(ADMIN_TYPE.valueSmall, "mt-0.5 font-semibold text-primary")}>
                           {formatCurrency(s.cost, s.currency)}
                         </p>
                       </div>
@@ -335,7 +337,7 @@ export default function AdminUserDetailPage() {
                 <div className="absolute left-[22px] sm:left-[26px] top-3 bottom-3 w-[2px] bg-border/70 rounded-full" />
                 <ul className="space-y-1">
                   {!activity.length && (
-                    <li className="p-6 sm:p-8 text-center text-muted-foreground text-sm">
+                    <li className={cn(ADMIN_TYPE.meta, "p-6 text-center sm:p-8")}>
                       No recent activity for this customer.
                     </li>
                   )}
@@ -346,13 +348,13 @@ export default function AdminUserDetailPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <p className="text-sm font-medium leading-snug">{a.action}</p>
-                          <span className="max-w-full text-[11px] text-muted-foreground sm:whitespace-nowrap">
+                          <p className={cn(ADMIN_TYPE.value, "leading-snug")}>{a.action}</p>
+                          <span className={cn(ADMIN_TYPE.help, "max-w-full sm:whitespace-nowrap")}>
                             {formatDateTime(a.timestamp)}
                           </span>
                         </div>
                         {a.details && (
-                          <p className="text-xs text-muted-foreground mt-1 leading-snug">{a.details}</p>
+                          <p className={cn(ADMIN_TYPE.secondary, "mt-1")}>{a.details}</p>
                         )}
                         <div className="mt-1.5 flex flex-wrap gap-1.5">
                           <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-muted font-mono text-muted-foreground">
@@ -399,10 +401,10 @@ function MiniStat({
           {icon}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] sm:text-base font-serif font-semibold leading-tight truncate">
+          <p className={cn(ADMIN_TYPE.statValue, "text-[15px] leading-tight truncate sm:text-base")}>
             {value}
           </p>
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mt-0.5 truncate">
+          <p className={cn(ADMIN_TYPE.labelMicro, "mt-0.5 truncate")}>
             {label}
           </p>
         </div>
@@ -433,11 +435,11 @@ function SectionCard({
               {icon}
             </span>
             <div className="min-w-0">
-              <CardTitle className="font-serif text-base sm:text-lg leading-tight truncate">
+              <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "sm:text-lg truncate")}>
                 {title}
               </CardTitle>
               {subtitle && (
-                <CardDescription className="mt-0.5 text-xs sm:text-sm truncate">
+                <CardDescription className={cn(ADMIN_TYPE.secondary, "mt-0.5 truncate")}>
                   {subtitle}
                 </CardDescription>
               )}
@@ -462,8 +464,8 @@ function StatTile({
 }) {
   return (
     <div className={`rounded-2xl border ${tone} p-3.5`}>
-      <p className="text-2xl font-serif font-semibold leading-tight">{value}</p>
-      <p className="text-[10px] uppercase tracking-[0.14em] font-semibold opacity-85 mt-0.5">
+      <p className={cn(ADMIN_TYPE.statValue, "text-current leading-tight")}>{value}</p>
+      <p className={cn(ADMIN_TYPE.labelMicro, "mt-0.5 text-current")}>
         {label}
       </p>
     </div>
@@ -487,10 +489,10 @@ function InfoRow({
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+        <p className={ADMIN_TYPE.labelMicro}>
           {label}
         </p>
-        <p className={`text-sm font-medium break-words leading-snug ${mono ? "font-mono" : ""}`}>
+        <p className={cn(ADMIN_TYPE.value, "break-words", mono && "font-mono")}>
           {value}
         </p>
       </div>
@@ -501,10 +503,10 @@ function InfoRow({
 function SmallInfo({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border bg-muted/20 p-2.5 sm:p-3">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">
+      <p className={ADMIN_TYPE.labelMicro}>
         {label}
       </p>
-      <p className="text-xs sm:text-sm font-medium truncate mt-0.5 leading-snug">{value}</p>
+      <p className={cn(ADMIN_TYPE.valueSmall, "truncate mt-0.5")}>{value}</p>
     </div>
   );
 }

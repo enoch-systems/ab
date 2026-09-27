@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useAppState } from "@/lib/app-state";
@@ -28,6 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLiveNow } from "@/hooks/use-live-now";
 import {
   ALL_SHIPMENT_STATUSES,
@@ -39,10 +47,11 @@ import {
   scanStats,
 } from "@/lib/shipment-progress";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 import { toast } from "sonner";
 import {
-  AlertTriangle, ArrowLeft, ArrowRight, Banknote, Building2, Check, CheckCircle2, CircleDot,
-  Clock, Copy, Edit3, Hash, History, Loader2, Mail, MapPin, Package, Phone, Scale, Send,
+  AlertTriangle, ArrowLeft, ArrowRight, Banknote, Building2, Check, CheckCircle2, ChevronDown,
+  CircleDot, Clock, Edit3, Hash, History, Loader2, Mail, MapPin, Package, Phone, Scale, Send,
   Truck, User, Users, Ruler,
 } from "lucide-react";
 
@@ -67,7 +76,6 @@ export default function AdminShipmentDetailPage() {
   const [flashIds, setFlashIds] = useState<string[]>([]);
   const [announcement, setAnnouncement] = useState("");
   const [statusOpen, setStatusOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [drafts, setDrafts] = useState({ destination: "", address: "", currentLocation: "" });
 
   const applyTimer = useRef<number | null>(null);
@@ -151,17 +159,6 @@ export default function AdminShipmentDetailPage() {
     }
     return actions;
   }, [shipment, advanceStatus, isDelivered, isException]);
-
-  const copyTracking = useCallback(async () => {
-    if (!shipment) return;
-    try {
-      await navigator.clipboard.writeText(shipment.trackingNumber);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("Clipboard access is blocked in this browser.");
-    }
-  }, [shipment]);
 
   const saveLocation = () => {
     if (!shipment) return;
@@ -271,7 +268,7 @@ export default function AdminShipmentDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1400px] pb-10 sm:pb-14">
+    <div className="mx-auto w-full min-w-0 max-w-6xl pb-2">
       <AdminBreadcrumbs
         items={[
           { label: "Dashboard", href: "/admin" },
@@ -280,318 +277,317 @@ export default function AdminShipmentDetailPage() {
         ]}
       />
 
-      {/* Header — identity, live state, and the two things an operator does from here */}
-      <div className="mb-5 flex flex-col gap-4 lg:mb-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <Button asChild variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-full lg:hidden">
+      {/* Header — identity on one row, then the title, the one meta line and the two actions */}
+      <header className="mb-4 sm:mb-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="icon" className="h-9 w-9 shrink-0 rounded-full lg:hidden">
             <Link href="/admin/shipments" aria-label="Back to orders">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
+          <AdminIdPill value={shipment.trackingNumber} icon={<Hash className="h-3 w-3" />} />
+          <CopyTrackingId value={shipment.trackingNumber} />
+          <StatusBadge status={shipment.status} />
+        </div>
+
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <AdminIdPill value={shipment.trackingNumber} icon={<Hash className="h-3 w-3" />} />
-              <CopyTrackingId value={shipment.trackingNumber} className="!h-6 !w-6 !rounded-md" />
-              <StatusBadge status={shipment.status} />
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {lastUpdatedLabel
-                  ? `Updated ${lastUpdatedLabel}`
-                  : `Updated ${formatDateTime(shipment.lastUpdated)}`}
-              </span>
-            </div>
-            <h1 className="mt-2 font-serif text-2xl leading-tight tracking-tight sm:text-3xl">
+            <h1 className="font-serif text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
               Shipment Operations
             </h1>
-            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-              {shipment.shippingMethod} · {shipment.origin} → {shipment.destination} · ETA{" "}
-              {formatDate(shipment.estimatedDelivery)}
+            <p className={cn(ADMIN_TYPE.meta, "mt-1.5")}>
+              <span className="font-medium text-foreground/80">
+                {shipment.shippingMethod} · {shipment.origin} → {shipment.destination}
+              </span>
+              {" · "}
+              Updated {lastUpdatedLabel ?? formatDateTime(shipment.lastUpdated)}
             </p>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-          <Button variant="outline" className="h-10 rounded-xl" onClick={copyTracking}>
-            {copied ? <Check className="mr-2 h-4 w-4 text-emerald-600" /> : <Copy className="mr-2 h-4 w-4" />}
-            {copied ? "Copied" : "Copy ID"}
-          </Button>
-          <Button
-            asChild
-            className="h-10 rounded-xl bg-primary font-semibold text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/92"
-          >
-            <Link href={`/track/${shipment.trackingNumber}`}>
-              Public view
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
-          </Button>
+          {/* Primary action first, equal halves on phones so both stay aligned */}
+          <div className="grid grid-cols-2 gap-2 sm:w-auto sm:shrink-0">
+            <Button
+              type="button"
+              onClick={() => setStatusOpen(true)}
+              className="h-11 rounded-xl bg-gradient-to-r from-primary to-cyan-500 px-3 font-semibold text-white shadow-md shadow-primary/20 sm:px-4"
+            >
+              <Edit3 className="mr-2 h-4 w-4" /> Update status
+            </Button>
+            <Button asChild variant="outline" className="h-11 rounded-xl px-3 sm:px-4">
+              <Link href={`/track/${shipment.trackingNumber}`}>
+                Public view
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* 1 · Where is it right now — live route plus the facts an operator needs */}
-      <ShipmentRouteProgress
-        shipment={shipment}
-        className="animate-rise-in mb-4 sm:mb-5"
-      >
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-          <FactChip icon={<Truck className="h-3.5 w-3.5" />} label="Method" value={shipment.shippingMethod} />
-          <FactChip
-            icon={<MapPin className="h-3.5 w-3.5" />}
-            label="Current location"
-            value={shipment.currentLocation.split(",")[0]}
-          />
-          <FactChip icon={<Scale className="h-3.5 w-3.5" />} label="Weight" value={`${shipment.weight} kg`} />
-          <FactChip
-            icon={<Package className="h-3.5 w-3.5" />}
-            label="Packages"
-            value={String(shipment.packageCount)}
-          />
-          <FactChip
+      {/* 1 · Where is it right now — the live rail plus the two live facts nothing else repeats */}
+      <ShipmentRouteProgress shipment={shipment} className="animate-rise-in mb-4 sm:mb-5">
+        <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
+          <LiveFact
             icon={<Clock className="h-3.5 w-3.5" />}
             label="ETA"
             value={formatDate(shipment.estimatedDelivery)}
             sub={etaSubLabel ?? undefined}
             tone={etaOverdue ? "warn" : "default"}
           />
-          <FactChip
-            icon={<Banknote className="h-3.5 w-3.5" />}
-            label="Cost"
-            value={formatCurrency(shipment.cost, shipment.currency)}
+          <LiveFact
+            icon={<MapPin className="h-3.5 w-3.5" />}
+            label="Current location"
+            value={shipment.currentLocation}
           />
-          <FactChip
-            icon={<History className="h-3.5 w-3.5" />}
-            label="Last update"
-            value={lastUpdatedLabel ?? formatDateTime(shipment.lastUpdated)}
-          />
-        </div>
+        </dl>
       </ShipmentRouteProgress>
 
-      {shipment.images && shipment.images.length > 0 && <AdminPanel title="Product & packing images" subtitle="Uploaded with this shipment" icon={<Package className="h-4 w-4" />} className="mb-4 sm:mb-5"><div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{shipment.images.map((image) => <a key={image.id} href={image.publicUrl} target="_blank" rel="noreferrer" className="overflow-hidden rounded-2xl border"><img src={image.publicUrl} alt={image.altText} className="aspect-[4/3] w-full object-cover transition hover:scale-[1.02]" /></a>)}</div></AdminPanel>}
-
-      {/* 2 · Cockpit — the live timeline (click to open the update dialog), then correct + reference */}
-      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-12">
-        {/* Timeline & status update — the live timeline IS the cockpit. Clicking it (or
-            Update status) opens the apply dialog and blurs the rest of the screen. */}
-        <div className="order-1 lg:order-1 lg:col-span-12">
-          <AdminPanel
-            title="Tracking timeline"
-            subtitle={`${completedScans} of ${scanCount} tracking scans recorded`}
-            icon={<Truck className="h-4 w-4" />}
-            className="animate-rise-in"
-            contentClassName="p-3 sm:p-5"
-            action={
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Live
-              </span>
-            }
-          >
-            <button
-              type="button"
-              onClick={() => setStatusOpen(true)}
-              aria-label="Open status update"
-              className="group w-full text-left"
-            >
-              <div className="mb-3 flex items-center gap-3 px-1">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                  <span
-                    className="block h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-[width] duration-700 ease-out"
-                    style={{ width: `${scanProgress}%` }}
-                  />
-                </div>
-                <span className="shrink-0 font-mono text-[11px] font-semibold text-muted-foreground">
-                  {completedScans}/{scanCount}
-                </span>
-              </div>
-              <TrackingTimeline events={shipment.trackingEvents} animate flashIds={flashIds} />
-            </button>
+      {/* 2 · Cockpit — the live timeline sits next to the address & location controls */}
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
+        <AdminPanel
+          title="Tracking timeline"
+          icon={<Truck className="h-4 w-4" />}
+          className="animate-rise-in lg:col-span-7"
+          contentClassName="p-3 sm:p-5"
+          action={
             <Button
               type="button"
+              variant="outline"
               onClick={() => setStatusOpen(true)}
-              className="mt-4 h-11 w-full rounded-xl bg-gradient-to-r from-primary to-cyan-500 font-semibold text-white shadow-md shadow-primary/20"
+              className="h-9 gap-1.5 rounded-lg px-3 text-xs font-semibold"
             >
-              <Edit3 className="mr-2 h-4 w-4" /> Update status
+              <Edit3 className="h-3.5 w-3.5" /> Update
             </Button>
-          </AdminPanel>
-        </div>
-
-        {/* Correct: addresses and the parcel's current location */}
-        <div className="order-2 lg:order-2 lg:col-span-4">
-          <AdminPanel
-            title="Address & location"
-            subtitle="No lookup required — any clear location works."
-            icon={<MapPin className="h-4 w-4" />}
-            className="animate-rise-in"
-            contentClassName="p-4 sm:p-5"
-          >
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="order-destination"
-                  className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                >
-                  Destination
-                </label>
-                <Input
-                  id="order-destination"
-                  value={drafts.destination}
-                  onChange={(event) => setDrafts((d) => ({ ...d, destination: event.target.value }))}
-                  maxLength={200}
-                  className="h-11 rounded-xl"
-                  placeholder="City, region or facility"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="order-address"
-                  className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                >
-                  Delivery address
-                </label>
-                <Textarea
-                  id="order-address"
-                  value={drafts.address}
-                  onChange={(event) => setDrafts((d) => ({ ...d, address: event.target.value }))}
-                  maxLength={240}
-                  rows={3}
-                  className="resize-y rounded-xl text-base sm:text-sm"
-                  placeholder="Street, suite, city"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="order-current-location"
-                  className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-                >
-                  Current parcel location
-                </label>
-                <Input
-                  id="order-current-location"
-                  value={drafts.currentLocation}
-                  onChange={(event) => setDrafts((d) => ({ ...d, currentLocation: event.target.value }))}
-                  maxLength={200}
-                  className="h-11 rounded-xl"
-                  placeholder="Warehouse, hub, driver or city"
-                />
-              </div>
-
-              <Button
-                type="button"
-                onClick={saveLocation}
-                disabled={savingLocation}
-                className="h-11 w-full rounded-xl font-semibold shadow-md shadow-primary/20"
-              >
-                {savingLocation ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
-                  </>
-                ) : (
-                  <>
-                    <MapPin className="mr-2 h-4 w-4" /> Save address & location
-                  </>
-                )}
-              </Button>
-            </div>
-          </AdminPanel>
-        </div>
-
-        {/* Reference: people, package and money */}
-        <div className="order-3 space-y-4 sm:space-y-5 lg:order-3 lg:col-span-8">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
-            {customer && (
-              <PartyCard
-                role="Customer"
-                icon={<Users className="h-4 w-4" />}
-                name={customer.fullName}
-                email={customer.email}
-                phone={customer.phone}
-                address={[customer.address, customer.city, customer.state, customer.country]
-                  .filter(Boolean)
-                  .join(", ")}
-                href={`/admin/users/${customer.id}`}
-                hrefLabel="Open account"
+          }
+        >
+          <div className="mb-3 flex items-center gap-3 px-1">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-primary to-cyan-400 transition-[width] duration-700 ease-out"
+                style={{ width: `${scanProgress}%` }}
               />
-            )}
-            <PartyCard
-              role="Sender"
-              icon={<User className="h-4 w-4" />}
-              name={shipment.sender.name}
-              email={shipment.sender.email}
-              phone={shipment.sender.phone}
-              address={[
-                shipment.sender.address,
-                shipment.sender.city,
-                shipment.sender.state,
-                shipment.sender.country,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+            </div>
+            <span className={cn(ADMIN_TYPE.help, "shrink-0 font-mono font-semibold")}>
+              <span className="text-foreground">
+                {completedScans}/{scanCount}
+              </span>{" "}
+              scans
+            </span>
+          </div>
+          <TrackingTimeline events={shipment.trackingEvents} animate flashIds={flashIds} />
+        </AdminPanel>
+
+        <AdminPanel
+          title="Address & location"
+          subtitle="No lookup required — any clear location works."
+          icon={<MapPin className="h-4 w-4" />}
+          className="animate-rise-in lg:col-span-5"
+          contentClassName="p-4 sm:p-5"
+        >
+          <div className="space-y-3.5">
+            <div className="space-y-2">
+              <label
+                htmlFor="order-destination"
+                className={cn(ADMIN_TYPE.label, "block")}
+              >
+                Destination
+              </label>
+              <Input
+                id="order-destination"
+                value={drafts.destination}
+                onChange={(event) => setDrafts((d) => ({ ...d, destination: event.target.value }))}
+                maxLength={200}
+                className="h-11 rounded-xl"
+                placeholder="City, region or facility"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="order-address"
+                className={cn(ADMIN_TYPE.label, "block")}
+              >
+                Delivery address
+              </label>
+              <Textarea
+                id="order-address"
+                value={drafts.address}
+                onChange={(event) => setDrafts((d) => ({ ...d, address: event.target.value }))}
+                maxLength={240}
+                rows={2}
+                className="resize-y rounded-xl text-base sm:text-sm"
+                placeholder="Street, suite, city"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="order-current-location"
+                className={cn(ADMIN_TYPE.label, "block")}
+              >
+                Current parcel location
+              </label>
+              <Input
+                id="order-current-location"
+                value={drafts.currentLocation}
+                onChange={(event) => setDrafts((d) => ({ ...d, currentLocation: event.target.value }))}
+                maxLength={200}
+                className="h-11 rounded-xl"
+                placeholder="Warehouse, hub, driver or city"
+              />
+            </div>
+
+            <Button
+              type="button"
+              onClick={saveLocation}
+              disabled={savingLocation}
+              className="h-11 w-full rounded-xl font-semibold shadow-md shadow-primary/20"
+            >
+              {savingLocation ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…
+                </>
+              ) : (
+                <>
+                  <MapPin className="mr-2 h-4 w-4" /> Save address & location
+                </>
+              )}
+            </Button>
+          </div>
+        </AdminPanel>
+      </div>
+
+      {/* 3 · People on this order */}
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+        {customer && (
+          <PartyCard
+            role="Customer"
+            icon={<Users className="h-4 w-4" />}
+            name={customer.fullName}
+            email={customer.email}
+            phone={customer.phone}
+            address={[customer.address, customer.city, customer.state, customer.country]
+              .filter(Boolean)
+              .join(", ")}
+            href={`/admin/users/${customer.id}`}
+            hrefLabel="Open account"
+          />
+        )}
+        <PartyCard
+          role="Sender"
+          icon={<User className="h-4 w-4" />}
+          name={shipment.sender.name}
+          email={shipment.sender.email}
+          phone={shipment.sender.phone}
+          address={[
+            shipment.sender.address,
+            shipment.sender.city,
+            shipment.sender.state,
+            shipment.sender.country,
+          ]
+            .filter(Boolean)
+            .join(", ")}
+        />
+        <PartyCard
+          role="Recipient"
+          icon={<MapPin className="h-4 w-4" />}
+          name={shipment.recipient.name}
+          email={shipment.recipient.email}
+          phone={shipment.recipient.phone}
+          address={[
+            shipment.recipient.address,
+            shipment.recipient.city,
+            shipment.recipient.state,
+            shipment.recipient.country,
+          ]
+            .filter(Boolean)
+            .join(", ")}
+        />
+      </div>
+
+      {/* 4 · Package, cost and the images that travelled with it */}
+      <div className="mt-4 grid grid-cols-1 items-start gap-4 sm:mt-5 sm:gap-5 lg:grid-cols-12">
+        <AdminPanel
+          title="Package & cost"
+          subtitle={`${shipment.packageCount} × ${shipment.packageType} · ${shipment.shippingMethod}`}
+          icon={<Package className="h-4 w-4" />}
+          className={cn(
+            "animate-rise-in",
+            shipment.images?.length ? "lg:col-span-7" : "lg:col-span-12",
+          )}
+          contentClassName="p-4 sm:p-5 space-y-4"
+        >
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2.5">
+            <InfoRow label="Type" value={shipment.packageType} icon={<Package className="h-3.5 w-3.5" />} />
+            <InfoRow label="Weight" value={`${shipment.weight} kg`} icon={<Scale className="h-3.5 w-3.5" />} />
+            <InfoRow label="Dimensions" value={shipment.dimensions} icon={<Ruler className="h-3.5 w-3.5" />} />
+            <InfoRow
+              label="Packages"
+              value={String(shipment.packageCount)}
+              icon={<Package className="h-3.5 w-3.5" />}
             />
-            <PartyCard
-              role="Recipient"
-              icon={<MapPin className="h-4 w-4" />}
-              name={shipment.recipient.name}
-              email={shipment.recipient.email}
-              phone={shipment.recipient.phone}
-              address={[
-                shipment.recipient.address,
-                shipment.recipient.city,
-                shipment.recipient.state,
-                shipment.recipient.country,
-              ]
-                .filter(Boolean)
-                .join(", ")}
+            <InfoRow label="Method" value={shipment.shippingMethod} icon={<Truck className="h-3.5 w-3.5" />} />
+            <InfoRow
+              label="Cost"
+              value={formatCurrency(shipment.cost, shipment.currency)}
+              icon={<Banknote className="h-3.5 w-3.5" />}
+            />
+            <InfoRow
+              label="Created"
+              value={formatDateTime(shipment.createdAt)}
+              icon={<Clock className="h-3.5 w-3.5" />}
+            />
+            <InfoRow
+              label="Last updated"
+              value={formatDateTime(shipment.lastUpdated)}
+              icon={<History className="h-3.5 w-3.5" />}
             />
           </div>
 
-          <AdminPanel
-            title="Package & cost"
-            subtitle={`${shipment.packageCount} × ${shipment.packageType} · ${shipment.shippingMethod}`}
-            icon={<Package className="h-4 w-4" />}
-            className="animate-rise-in"
-            contentClassName="p-4 sm:p-5 space-y-4"
-          >
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-              <InfoRow label="Type" value={shipment.packageType} icon={<Package className="h-3.5 w-3.5" />} />
-              <InfoRow label="Weight" value={`${shipment.weight} kg`} icon={<Scale className="h-3.5 w-3.5" />} />
-              <InfoRow label="Dimensions" value={shipment.dimensions} icon={<Ruler className="h-3.5 w-3.5" />} />
-              <InfoRow
-                label="Packages"
-                value={String(shipment.packageCount)}
-                icon={<Package className="h-3.5 w-3.5" />}
-              />
-              <InfoRow label="Method" value={shipment.shippingMethod} icon={<Truck className="h-3.5 w-3.5" />} />
-              <InfoRow
-                label="Cost"
-                value={formatCurrency(shipment.cost, shipment.currency)}
-                icon={<Banknote className="h-3.5 w-3.5" />}
-              />
-              <InfoRow
-                label="Created"
-                value={formatDateTime(shipment.createdAt)}
-                icon={<Clock className="h-3.5 w-3.5" />}
-              />
-              <InfoRow
-                label="Last updated"
-                value={formatDateTime(shipment.lastUpdated)}
-                icon={<History className="h-3.5 w-3.5" />}
-              />
-            </div>
-
-            {shipment.instructions && (
-              <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-700 dark:text-amber-300">
-                <span className="font-semibold">Handling instructions · </span>
+          {shipment.instructions && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+              <p className={cn(ADMIN_TYPE.label, "mb-1 text-amber-700 dark:text-amber-300")}>
+                Handling instructions
+              </p>
+              <p className="text-[13px] leading-relaxed text-amber-900 dark:text-amber-100">
                 {shipment.instructions}
               </p>
-            )}
+            </div>
+          )}
+        </AdminPanel>
+
+        {shipment.images && shipment.images.length > 0 && (
+          <AdminPanel
+            title="Product & packing images"
+            subtitle={`${shipment.images.length} uploaded with this order`}
+            icon={<Package className="h-4 w-4" />}
+            className="animate-rise-in lg:col-span-5"
+            contentClassName="p-3 sm:p-4"
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {shipment.images.map((image) => (
+                <a
+                  key={image.id}
+                  href={image.publicUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group block overflow-hidden rounded-xl border border-border/70"
+                >
+                  <img
+                    src={image.publicUrl}
+                    alt={image.altText}
+                    loading="lazy"
+                    className="aspect-square w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+                  />
+                </a>
+              ))}
+            </div>
           </AdminPanel>
-        </div>
+        )}
       </div>
 
       {/* Status update dialog — everything behind it stays blurred while it's open */}
       <Dialog open={statusOpen} onOpenChange={setStatusOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto overscroll-contain sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 justify-center sm:justify-start">
               <Edit3 className="h-5 w-5 text-primary" />
@@ -600,10 +596,24 @@ export default function AdminShipmentDetailPage() {
             <DialogDescription>Timeline, notifications and analytics update instantly.</DialogDescription>
           </DialogHeader>
           <form onSubmit={apply} className="space-y-4">
-            <JourneyStepper status={shipment.status} selected={next} onSelect={setNext} />
+            {/* Phones: a 7-stage rail plus a chip row is nothing but sideways scrolling,
+                so both collapse into one grouped chooser. */}
+            <div className="sm:hidden">
+              <MobileStatusChooser
+                current={shipment.status}
+                value={next}
+                onSelect={setNext}
+                quickActions={quickActions}
+              />
+            </div>
+
+            {/* Tablet and up: the full journey rail, with the quick actions underneath */}
+            <div className="hidden sm:block">
+              <JourneyStepper status={shipment.status} selected={next} onSelect={setNext} />
+            </div>
 
             {quickActions.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="hidden flex-wrap gap-2 sm:flex">
                 {quickActions.map((action) => (
                   <button
                     key={action.status}
@@ -611,7 +621,7 @@ export default function AdminShipmentDetailPage() {
                     onClick={() => setNext(action.status)}
                     aria-pressed={next === action.status}
                     className={cn(
-                      "inline-flex h-9 items-center gap-1.5 rounded-full border bg-card px-3 text-[11px] font-semibold transition",
+                      "inline-flex h-9 items-center gap-1.5 rounded-full border bg-card px-3 text-xs font-semibold transition",
                       action.tone,
                       next === action.status && "ring-2 ring-primary/30",
                     )}
@@ -623,10 +633,11 @@ export default function AdminShipmentDetailPage() {
               </div>
             )}
 
-            <div className="space-y-2">
+            {/* Tablet and up keep the labelled select — phones pick from the chooser above */}
+            <div className="hidden space-y-2 sm:block">
               <label
                 htmlFor="next-status"
-                className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                className={cn(ADMIN_TYPE.label, "block")}
               >
                 New status
               </label>
@@ -647,7 +658,7 @@ export default function AdminShipmentDetailPage() {
             <div className="space-y-2">
               <label
                 htmlFor="status-location"
-                className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                className={cn(ADMIN_TYPE.label, "block")}
               >
                 Location (optional)
               </label>
@@ -663,12 +674,12 @@ export default function AdminShipmentDetailPage() {
 
             {pendingPreview && (
               <div className="animate-rise-in rounded-xl border border-primary/25 bg-primary/[0.04] p-3">
-                <p className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-foreground">
+                <p className={cn(ADMIN_TYPE.valueSmall, "flex flex-wrap items-center gap-1.5 font-semibold tracking-tight")}>
                   {shipment.status}
                   <ArrowRight className="h-3.5 w-3.5 text-primary" />
                   {pendingPreview.status}
                 </p>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
                   Recorded at <span className="font-medium text-foreground">{pendingPreview.location}</span> ·
                   route moves to{" "}
                   <span className="font-mono font-semibold text-primary">{pendingPreview.progress}%</span> ·{" "}
@@ -677,11 +688,24 @@ export default function AdminShipmentDetailPage() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col-reverse gap-2 border-t border-border/60 pt-4 sm:flex-row sm:justify-end">
+              {next && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 rounded-xl"
+                  onClick={() => {
+                    setNext("");
+                    setLocation("");
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
               <Button
                 type="submit"
                 disabled={applying || !next}
-                className="h-11 flex-1 rounded-xl bg-gradient-to-r from-primary to-cyan-500 font-semibold text-white shadow-md shadow-primary/20"
+                className="h-11 rounded-xl bg-gradient-to-r from-primary to-cyan-500 px-6 font-semibold text-white shadow-md shadow-primary/20"
               >
                 {applying ? (
                   <>
@@ -693,19 +717,6 @@ export default function AdminShipmentDetailPage() {
                   </>
                 )}
               </Button>
-              {next && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-11 rounded-xl"
-                  onClick={() => {
-                    setNext("");
-                    setLocation("");
-                  }}
-                >
-                  Clear
-                </Button>
-              )}
             </div>
             <p className="sr-only" aria-live="polite">
               {announcement}
@@ -735,8 +746,107 @@ function StatusIcon({ status }: { status: ShipmentStatus }) {
   }
 }
 
-/** One at-a-glance fact inside the live route panel. */
-function FactChip({
+/**
+ * Phone-sized status chooser.
+ *
+ * A 7-stage rail plus a chip row is two long lines of small targets on a narrow
+ * screen, so on phones both collapse into one grouped menu: quick actions first,
+ * then the remaining journey stages, then the exception branch.
+ */
+function MobileStatusChooser({
+  current,
+  value,
+  onSelect,
+  quickActions,
+}: {
+  current: ShipmentStatus;
+  value: ShipmentStatus | "";
+  onSelect: (status: ShipmentStatus) => void;
+  quickActions: { status: ShipmentStatus; label: string; tone: string }[];
+}) {
+  const quick = new Set(quickActions.map((action) => action.status));
+  const journey = SHIPMENT_JOURNEY.filter((stage) => stage !== current && !quick.has(stage));
+  const others = ALL_SHIPMENT_STATUSES.filter(
+    (status) => status !== current && !quick.has(status) && !SHIPMENT_JOURNEY.includes(status),
+  );
+
+  const menuItem = (status: ShipmentStatus, label: string) => (
+    <DropdownMenuItem key={status} onSelect={() => onSelect(status)} className="gap-2 py-2">
+      <StatusIcon status={status} />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {value === status && <Check className="h-3.5 w-3.5 text-primary" />}
+    </DropdownMenuItem>
+  );
+
+  return (
+    <div className="space-y-2">
+      <label
+        htmlFor="next-status-mobile"
+        className={cn(ADMIN_TYPE.label, "block")}
+      >
+        New status
+      </label>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            id="next-status-mobile"
+            type="button"
+            variant="outline"
+            className="h-11 w-full justify-between rounded-xl px-3"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              {value ? (
+                <>
+                  <StatusIcon status={value} />
+                  <span className="truncate text-sm font-semibold">{value}</span>
+                </>
+              ) : (
+                <span className="truncate text-sm font-normal text-muted-foreground">
+                  Choose next status…
+                </span>
+              )}
+            </span>
+            <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-(--radix-dropdown-menu-trigger-width) min-w-0"
+        >
+          {quickActions.length > 0 && (
+            <>
+              <DropdownMenuLabel className={ADMIN_TYPE.labelMicro}>
+                Quick actions
+              </DropdownMenuLabel>
+              {quickActions.map((action) => menuItem(action.status, action.label))}
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuLabel className={ADMIN_TYPE.labelMicro}>
+            Delivery journey
+          </DropdownMenuLabel>
+          {journey.map((stage) => menuItem(stage, stage))}
+          {others.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              {others.map((status) => menuItem(status, status))}
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <p className="text-xs text-muted-foreground">
+        Current status <span className="font-semibold text-foreground">{current}</span>
+      </p>
+    </div>
+  );
+}
+
+/**
+ * One live fact inside the route panel: label and value on one line on phones,
+ * a tidy stacked pair from `sm` up. Kept flat on purpose — the panels further
+ * down the page carry the full reference data.
+ */
+function LiveFact({
   icon,
   label,
   value,
@@ -750,29 +860,32 @@ function FactChip({
   tone?: "default" | "warn";
 }) {
   return (
-    <div className="min-w-0 rounded-xl border border-border/70 bg-card p-2.5 sm:p-3">
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="flex items-baseline justify-between gap-3 border-t border-dashed border-border/60 pt-2 first:border-t-0 first:pt-0 sm:block sm:border-t-0 sm:pt-0">
+      <dt className={cn(ADMIN_TYPE.label, "flex min-w-0 items-center gap-1.5")}>
         <span className="shrink-0 text-primary/80">{icon}</span>
         <span className="truncate">{label}</span>
-      </div>
-      <p className="truncate text-[13px] font-semibold leading-tight sm:text-sm">{value}</p>
-      {sub && (
-        <p
-          className={cn(
-            "mt-0.5 truncate text-[10px] font-medium",
-            tone === "warn" ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground",
-          )}
-        >
-          {sub}
-        </p>
-      )}
+      </dt>
+      <dd className={cn(ADMIN_TYPE.valueLarge, "min-w-0 text-right sm:mt-1 sm:text-left sm:text-base")}>
+        <span className="block truncate">{value}</span>
+        {sub && (
+          <span
+            className={cn(
+              "mt-0.5 block truncate text-[11px] font-medium",
+              tone === "warn" ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground",
+            )}
+          >
+            {sub}
+          </span>
+        )}
+      </dd>
     </div>
   );
 }
 
 /**
- * The delivery journey as a stage rail: swipeable on phones, a compact 2-up grid
- * in the desktop side column. Picking a stage stages it for the update form.
+ * The delivery journey as a stage rail. Rendered from `sm` up (phones use
+ * `MobileStatusChooser`) as a grid, so all seven stages stay visible instead of
+ * scrolling sideways. Picking a stage stages it for the update form.
  */
 function JourneyStepper({
   status,
@@ -789,7 +902,7 @@ function JourneyStepper({
     <div
       role="group"
       aria-label="Delivery stages"
-      className="hide-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:grid lg:grid-cols-2 lg:overflow-visible"
+      className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-4"
     >
       {SHIPMENT_JOURNEY.map((stage, idx) => {
         const reached = currentIdx >= 0 && idx <= currentIdx;
@@ -802,7 +915,7 @@ function JourneyStepper({
             onClick={() => onSelect(stage)}
             aria-pressed={isSelected}
             className={cn(
-              "flex min-w-[104px] shrink-0 flex-col items-start gap-1 rounded-xl border px-2.5 py-2 text-left transition lg:min-w-0",
+              "flex min-w-0 flex-col items-start gap-1 rounded-xl border px-2.5 py-2 text-left transition",
               isSelected
                 ? "border-primary bg-primary/10 shadow-sm"
                 : reached
@@ -820,12 +933,12 @@ function JourneyStepper({
                 {reached && !isCurrent ? <Check className="h-3 w-3" /> : idx + 1}
               </span>
               {isCurrent && (
-                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-primary">Now</span>
+                <span className={cn(ADMIN_TYPE.labelMicro, "font-bold text-primary")}>Now</span>
               )}
             </span>
             <span
               className={cn(
-                "text-[11px] font-semibold leading-tight",
+                "text-xs font-semibold leading-tight",
                 reached ? "text-foreground" : "text-muted-foreground",
               )}
             >
@@ -876,7 +989,7 @@ function PartyCard({
         ) : undefined
       }
     >
-      <p className="text-sm font-semibold leading-tight">{name}</p>
+      <p className={ADMIN_TYPE.valueLarge}>{name}</p>
       <div className="space-y-2.5">
         {phone && (
           <ContactLine
@@ -906,6 +1019,7 @@ function PartyCard({
   );
 }
 
+/** One contact on a person card: label on the left, value on the right. */
 function ContactLine({
   icon,
   label,
@@ -916,25 +1030,29 @@ function ContactLine({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-2">
-      <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-        <p className="break-words text-xs font-medium leading-snug text-foreground">{value}</p>
-      </div>
+    <div className="flex min-w-0 items-baseline gap-2">
+      <span className={cn(ADMIN_TYPE.label, "flex w-[5.25rem] shrink-0 items-center gap-1.5")}>
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
+      </span>
+      <span className={cn(ADMIN_TYPE.valueSmall, "min-w-0 flex-1 break-words")}>
+        {value}
+      </span>
     </div>
   );
 }
 
-/** Label/value pair used in the package & cost grid. */
+/** Label/value pair used in the package & cost grid: a row on phones, a box from `sm` up. */
 function InfoRow({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="min-w-0 rounded-xl border border-border/70 bg-muted/20 p-2.5">
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border/70 bg-muted/20 px-3 py-2 sm:block sm:p-2.5">
+      <div className={cn(ADMIN_TYPE.label, "flex min-w-0 items-center gap-1.5 sm:mb-1.5")}>
         {icon && <span className="shrink-0 text-primary/80">{icon}</span>}
         <span className="truncate">{label}</span>
       </div>
-      <p className="break-words text-[13px] font-semibold leading-snug">{value}</p>
+      <p className="min-w-0 break-words text-right text-sm font-semibold leading-snug text-foreground sm:text-left">
+        {value}
+      </p>
     </div>
   );
 }

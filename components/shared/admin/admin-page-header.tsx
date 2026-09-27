@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 
 interface AdminPageHeaderProps {
   title: React.ReactNode;
@@ -19,12 +20,10 @@ export function AdminPageHeader({ title, eyebrow, subtitle, actions, className }
     <div className={cn("flex flex-wrap items-end justify-between gap-3 mb-5 sm:mb-7", className)}>
       <div className="min-w-0 flex-1">
         {eyebrow && (
-          <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-1.5 truncate">
-            {eyebrow}
-          </p>
+          <p className={cn(ADMIN_TYPE.label, "mb-1.5 truncate")}>{eyebrow}</p>
         )}
-        <h1 className="font-serif text-2xl sm:text-3xl tracking-tight leading-tight">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{subtitle}</p>}
+        <h1 className={ADMIN_TYPE.pageTitle}>{title}</h1>
+        {subtitle && <p className={cn(ADMIN_TYPE.meta, "mt-1.5")}>{subtitle}</p>}
       </div>
       {actions && <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">{actions}</div>}
     </div>
@@ -49,7 +48,7 @@ export function AdminBreadcrumbs({ items, className }: AdminBreadcrumbsProps) {
                 {item.label}
               </Link>
             ) : (
-              <span className={cn("truncate max-w-[10rem]", last ? "text-foreground font-medium" : "")}>
+              <span className={cn("truncate max-w-[10rem]", last ? "text-foreground font-semibold" : "")}>
                 {item.label}
               </span>
             )}

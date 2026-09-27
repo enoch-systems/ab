@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,7 +92,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               {!collapsed && (
                 <div className="min-w-0">
                   <p className="font-serif text-xl font-semibold leading-none tracking-wide">ArcBest</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Operations</p>
+                  <p className={cn(ADMIN_TYPE.labelMicro, "mt-1")}>Operations</p>
                 </div>
               )}
             </Link>
@@ -120,7 +122,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </div>
           )}
           <nav className={`flex-1 py-5 ${collapsed ? "px-2" : "px-3"}`} aria-label="Admin navigation">
-            {!collapsed && <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Workspace</p>}
+            {!collapsed && <p className={cn(ADMIN_TYPE.labelMicro, "mb-3 px-3")}>Workspace</p>}
             <div className="space-y-1">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
@@ -160,8 +162,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             ) : (
               <>
                 <div className="rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/50 px-4 py-3">
-                  <p className="text-sm font-semibold">Admin workspace</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Manage users, orders and delivery</p>
+                  <p className={ADMIN_TYPE.value}>Admin workspace</p>
+                  <p className={cn(ADMIN_TYPE.help, "mt-0.5")}>Manage users, orders and delivery</p>
                 </div>
                 <Link href="/admin/settings" className="mt-3 inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-sidebar-accent hover:text-foreground">
                   <Settings className="h-3.5 w-3.5" /> Account settings
@@ -185,7 +187,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <BrandLogo className="h-9 w-9 shrink-0 rounded-xl object-contain" />
               <div className="min-w-0">
                 <p className="font-serif text-lg font-semibold leading-none">ArcBest</p>
-                <p className="mt-0.5 text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Operations</p>
+                <p className={cn(ADMIN_TYPE.labelMicro, "mt-0.5")}>Operations</p>
               </div>
             </Link>
             <div className="flex shrink-0 items-center gap-2">

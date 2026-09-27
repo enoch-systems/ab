@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 
 interface AdminPanelProps {
   title?: React.ReactNode;
@@ -38,8 +39,8 @@ export function AdminPanel({
           )}
           {(title || subtitle) && (
             <div className="flex-1 min-w-0">
-              {title && <h3 className="font-serif text-base sm:text-[17px] leading-tight truncate">{title}</h3>}
-              {subtitle && <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{subtitle}</p>}
+              {title && <h3 className={cn(ADMIN_TYPE.sectionTitle, "truncate")}>{title}</h3>}
+              {subtitle && <p className={cn(ADMIN_TYPE.panelSubtitle, "truncate")}>{subtitle}</p>}
             </div>
           )}
           {action && <div className="shrink-0">{action}</div>}

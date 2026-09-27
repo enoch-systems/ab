@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import type { Shipment, ShipmentStatus } from "@/lib/types";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 
 const SECTIONS: {
   key: string;
@@ -143,12 +145,12 @@ export default function AdminTrackingPage() {
                   {s.icon}
                 </div>
                 <p
-                  className={`text-[10px] leading-tight uppercase tracking-[0.12em] font-semibold sm:text-[11px] sm:tracking-[0.14em] ${isActive ? "text-white/80" : "text-muted-foreground"}`}
+                  className={cn(ADMIN_TYPE.labelMicro, "leading-tight", isActive && "text-white/85")}
                 >
                   {s.label}
                 </p>
                 <p
-                  className={`text-2xl sm:text-[28px] font-serif font-semibold leading-none mt-1 ${isActive ? "text-white" : ""}`}
+                  className={cn(ADMIN_TYPE.statValue, "sm:text-[28px] mt-1", isActive && "text-white")}
                 >
                   {count[s.key] ?? 0}
                 </p>
@@ -167,10 +169,10 @@ export default function AdminTrackingPage() {
                 <ActivityIcon className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <CardTitle className="font-serif text-base sm:text-lg truncate">
+                <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "sm:text-lg truncate")}>
                   {current.label} Shipments
                 </CardTitle>
-                <CardDescription className="mt-0.5 text-xs sm:text-sm truncate">
+                <CardDescription className={cn(ADMIN_TYPE.secondary, "mt-0.5 truncate")}>
                   {rows.length} shipments · sorted by most recent update
                 </CardDescription>
               </div>
@@ -189,13 +191,13 @@ export default function AdminTrackingPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[140px]">Tracking</TableHead>
-                  <TableHead>Current Location</TableHead>
-                  <TableHead>Destination</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Update</TableHead>
-                  <TableHead>ETA</TableHead>
-                  <TableHead className="text-right w-[80px]" />
+                  <TableHead className={cn(ADMIN_TYPE.labelMicro, "w-[140px]")}>Tracking</TableHead>
+                  <TableHead className={ADMIN_TYPE.labelMicro}>Current Location</TableHead>
+                  <TableHead className={ADMIN_TYPE.labelMicro}>Destination</TableHead>
+                  <TableHead className={ADMIN_TYPE.labelMicro}>Status</TableHead>
+                  <TableHead className={ADMIN_TYPE.labelMicro}>Last Update</TableHead>
+                  <TableHead className={ADMIN_TYPE.labelMicro}>ETA</TableHead>
+                  <TableHead className={cn(ADMIN_TYPE.labelMicro, "text-right w-[80px]")} />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -203,7 +205,7 @@ export default function AdminTrackingPage() {
                   <TableRow>
                     <TableCell
                       colSpan={7}
-                      className="h-40 text-center text-muted-foreground text-sm"
+                      className={cn(ADMIN_TYPE.meta, "h-40 text-center")}
                     >
                       <EmptyState label={`No shipments in "${current.label}"`} />
                     </TableCell>
@@ -219,20 +221,20 @@ export default function AdminTrackingPage() {
                       {s.trackingNumber}
                       <CopyTrackingId value={s.trackingNumber} className="ml-1.5 !h-6 !w-6 !rounded-md" />
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className={ADMIN_TYPE.valueSmall}>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-primary/70 shrink-0" />
                         <span className="truncate">{s.currentLocation}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate">{s.destination}</TableCell>
+                    <TableCell className={cn(ADMIN_TYPE.valueSmall, "max-w-[200px] truncate")}>{s.destination}</TableCell>
                     <TableCell>
                       <StatusBadge status={s.status} />
                     </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
+                    <TableCell className={cn("text-[13px] text-muted-foreground whitespace-nowrap")}>
                       {formatDate(s.lastUpdated)}
                     </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
+                    <TableCell className={cn("text-[13px] text-muted-foreground whitespace-nowrap")}>
                       {formatDate(s.estimatedDelivery)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -277,47 +279,47 @@ export default function AdminTrackingPage() {
                   </div>
                   <div className="space-y-3.5">
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-0.5">
+                      <p className={cn(ADMIN_TYPE.labelMicro, "mb-0.5")}>
                         Current
                       </p>
-                      <p className="text-sm font-semibold truncate leading-snug">
+                      <p className={cn(ADMIN_TYPE.value, "truncate")}>
                         {s.currentLocation}
                       </p>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold mb-0.5">
+                      <p className={cn(ADMIN_TYPE.labelMicro, "mb-0.5")}>
                         Destination
                       </p>
-                      <p className="text-sm font-semibold truncate leading-snug">{s.destination}</p>
+                      <p className={cn(ADMIN_TYPE.value, "truncate")}>{s.destination}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Meta grid */}
-                <div className="grid grid-cols-2 gap-2 text-[11px] border-t border-border/60 pt-3 sm:grid-cols-3">
+                <div className={cn(ADMIN_TYPE.help, "grid grid-cols-2 gap-2 border-t border-border/60 pt-3 sm:grid-cols-3")}>
                   <div>
-                    <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold flex items-center gap-1">
+                    <p className={cn(ADMIN_TYPE.labelMicro, "flex items-center gap-1")}>
                       <Clock className="w-3 h-3" />
                       Updated
                     </p>
-                    <p className="font-semibold mt-1 text-foreground leading-snug">
+                    <p className={cn(ADMIN_TYPE.valueSmall, "mt-1 font-semibold")}>
                       {formatDate(s.lastUpdated)}
                     </p>
                   </div>
                   <div>
-                    <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold flex items-center gap-1">
+                    <p className={cn(ADMIN_TYPE.labelMicro, "flex items-center gap-1")}>
                       <Truck className="w-3 h-3" />
                       Method
                     </p>
-                    <p className="font-semibold mt-1 text-foreground leading-snug">
+                    <p className={cn(ADMIN_TYPE.valueSmall, "mt-1 font-semibold")}>
                       {s.shippingMethod}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="uppercase tracking-[0.12em] text-muted-foreground font-semibold flex items-center gap-1 justify-end">
+                    <p className={cn(ADMIN_TYPE.labelMicro, "flex items-center gap-1 justify-end")}>
                       ETA
                     </p>
-                    <p className="font-semibold mt-1 text-primary leading-snug">
+                    <p className={cn(ADMIN_TYPE.valueSmall, "mt-1 font-semibold text-primary")}>
                       {formatDate(s.estimatedDelivery)}
                     </p>
                   </div>
@@ -337,8 +339,8 @@ function EmptyState({ label }: { label: string }) {
       <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
         <Package className="w-6 h-6 text-muted-foreground/70" />
       </div>
-      <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="text-xs text-muted-foreground/70 mt-1 max-w-xs mx-auto">
+      <p className={ADMIN_TYPE.value}>{label}</p>
+      <p className={cn(ADMIN_TYPE.secondary, "mt-1.5 max-w-xs mx-auto")}>
         Shipments will appear here when they match this category.
       </p>
     </div>

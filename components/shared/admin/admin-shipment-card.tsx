@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { StatusBadge, formatCurrency, formatDate, formatDateTime } from "@/components/shared/status-badge";
 import { CopyTrackingId } from "@/components/shared/copy-tracking-id";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 import type { Customer, Shipment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -32,11 +33,11 @@ interface MetaProps {
 function Meta({ label, value, icon, align = "left" }: MetaProps) {
   return (
     <div className={cn("min-w-0", align === "right" && "text-right")}>
-      <p className={cn("text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1", align === "right" && "justify-end")}>
+      <p className={cn(ADMIN_TYPE.labelMicro, "flex items-center gap-1", align === "right" && "justify-end")}>
         {icon}
         {label}
       </p>
-      {typeof value === "string" ? <p className="text-xs font-semibold truncate mt-0.5 leading-snug">{value}</p> : value}
+      {typeof value === "string" ? <p className={cn(ADMIN_TYPE.valueSmall, "font-semibold truncate mt-0.5")}>{value}</p> : value}
     </div>
   );
 }
@@ -54,11 +55,20 @@ export function AdminShipmentCard({
   className,
 }: AdminShipmentCardProps) {
   return (
-    <button
-      type="button"
+    // A div with button semantics rather than a real <button>: the card nests its own
+    // copy button, and buttons can't be nested inside buttons (React hydration error).
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick?.();
+        }
+      }}
       className={cn(
-        "w-full text-left rounded-2xl border border-border bg-card p-3.5 sm:p-4",
+        "w-full cursor-pointer text-left rounded-2xl border border-border bg-card p-3.5 sm:p-4",
         "hover:border-primary/30 hover:shadow-sm transition active:scale-[0.99]",
         className,
       )}
@@ -67,7 +77,7 @@ export function AdminShipmentCard({
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="min-w-0">
           <p className="font-mono text-xs sm:text-[13px] font-semibold text-primary truncate">{shipment.trackingNumber}<CopyTrackingId value={shipment.trackingNumber} className="ml-1.5 !h-6 !w-6 !rounded-md" /></p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(shipment.createdAt)}</p>
+          <p className={cn(ADMIN_TYPE.help, "mt-0.5")}>{formatDate(shipment.createdAt)}</p>
         </div>
         <StatusBadge status={shipment.status} className="max-w-[9rem] shrink-0 truncate" />
       </div>
@@ -77,14 +87,14 @@ export function AdminShipmentCard({
           <span className="shrink-0 w-6 h-6 rounded-lg bg-primary/10 text-primary font-serif text-[10px] flex items-center justify-center">
             {customer.fullName[0]}
           </span>
-          <span className="text-sm font-medium truncate">{customer.fullName}</span>
+          <span className={cn(ADMIN_TYPE.value, "truncate")}>{customer.fullName}</span>
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0 mb-3">
+      <div className={cn(ADMIN_TYPE.secondary, "flex items-center gap-1.5 min-w-0 mb-3")}>
         <MapPin className="w-3.5 h-3.5 shrink-0 opacity-80" />
         <span className="truncate">
-          {shipment.origin.split(",")[0]} → <span className="font-medium text-foreground/90">{shipment.destination.split(",")[0]}</span>
+          {shipment.origin.split(",")[0]} → <span className="font-semibold text-foreground">{shipment.destination.split(",")[0]}</span>
         </span>
       </div>
 
@@ -105,7 +115,7 @@ export function AdminShipmentCard({
       </div>
 
       <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-muted-foreground truncate inline-flex items-center gap-1.5">
+        <span className={cn(ADMIN_TYPE.help, "truncate inline-flex items-center gap-1.5")}>
           <Clock className="w-3 h-3 shrink-0 opacity-80" />
           <span className="truncate">Updated {formatDateTime(shipment.lastUpdated)}</span>
         </span>
@@ -114,6 +124,6 @@ export function AdminShipmentCard({
           <ChevronRight className="w-3.5 h-3.5" />
         </span>
       </div>
-    </button>
+    </div>
   );
 }

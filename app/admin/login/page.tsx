@@ -7,6 +7,8 @@ import { useAppState } from "@/lib/app-state";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { AuthSuccessOverlay, type AuthOverlayStage } from "@/components/shared/auth-success-overlay";
 import {
@@ -89,12 +91,12 @@ export default function AdminLoginPage() {
               <BrandLogo className="h-12 w-12 shrink-0 rounded-2xl object-contain" />
               <div>
                 <p className="font-serif text-2xl font-semibold tracking-wide leading-none">ArcBest</p>
-                <p className="text-xs text-muted-foreground mt-1 uppercase tracking-[0.2em]">Operations Console</p>
+                <p className={cn(ADMIN_TYPE.labelMicro, "mt-1")}>Operations Console</p>
               </div>
             </div>
 
             <div>
-              <span className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-primary">
+              <span className="mb-5 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                 <Shield className="h-3.5 w-3.5" />
                 Admin / Operations
               </span>
@@ -117,7 +119,7 @@ export default function AdminLoginPage() {
               <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/25 blur-3xl" />
               <div className="absolute -bottom-20 -left-10 w-72 h-72 rounded-full bg-cyan-400/15 blur-3xl" />
               <div className="relative">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-white/50 mb-3">Live Snapshot</p>
+                <p className={cn(ADMIN_TYPE.labelMicro, "text-white/80 mb-3")}>Live Snapshot</p>
                 <div className="flex items-baseline justify-between mb-5">
                   <p className="font-serif text-4xl font-semibold">142</p>
                   <p className="text-sm text-emerald-300 inline-flex items-center gap-1">
@@ -140,13 +142,13 @@ export default function AdminLoginPage() {
               <BrandLogo className="h-10 w-10 rounded-xl object-contain" />
               <div>
                 <p className="font-serif text-xl font-semibold leading-none">ArcBest</p>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">Ops Console</p>
+                <p className={cn(ADMIN_TYPE.labelMicro, "mt-0.5")}>Ops Console</p>
               </div>
             </div>
 
             <div className="rounded-3xl border border-border/80 bg-card shadow-xl shadow-foreground/[0.04] overflow-hidden">
               <div className="px-6 sm:px-8 pt-8 pb-2">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-[0.1em] mb-4">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-[0.14em] mb-4">
                   <Shield className="w-3.5 h-3.5" />
                   Admin / Operations
                 </div>
@@ -174,7 +176,7 @@ export default function AdminLoginPage() {
                       onChange={(e) => { setEmail(e.target.value); clearError(); setFieldErrors((f) => ({ ...f, email: undefined })); }}
                       placeholder="admin@arcbest.com"
                       aria-invalid={!!fieldErrors.email}
-                      className={`w-full h-12 pl-10 pr-4 rounded-xl border bg-background text-sm placeholder:text-muted-foreground/70 transition focus:outline-none focus:ring-2 ${
+                      className={`w-full h-12 pl-10 pr-4 rounded-xl border bg-background text-sm placeholder:text-muted-foreground transition focus:outline-none focus:ring-2 ${
                         fieldErrors.email
                           ? "border-destructive/60 focus:ring-destructive/25"
                           : "border-border focus:ring-ring/30 focus:border-ring/50"
@@ -205,7 +207,7 @@ export default function AdminLoginPage() {
                       onChange={(e) => { setPassword(e.target.value); clearError(); setFieldErrors((f) => ({ ...f, password: undefined })); }}
                       placeholder="Enter your password"
                       aria-invalid={!!fieldErrors.password}
-                      className={`w-full h-12 pl-10 pr-12 rounded-xl border bg-background text-sm placeholder:text-muted-foreground/70 transition focus:outline-none focus:ring-2 ${
+                      className={`w-full h-12 pl-10 pr-12 rounded-xl border bg-background text-sm placeholder:text-muted-foreground transition focus:outline-none focus:ring-2 ${
                         fieldErrors.password
                           ? "border-destructive/60 focus:ring-destructive/25"
                           : "border-border focus:ring-ring/30 focus:border-ring/50"
@@ -277,7 +279,7 @@ export default function AdminLoginPage() {
                 </div>
 
                 <div className="pt-3 mt-1 border-t border-border/60">
-                  <p className="text-[11px] leading-relaxed text-muted-foreground flex items-start gap-2">
+                  <p className={cn(ADMIN_TYPE.help, "flex items-start gap-2")}>
                     <Shield className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary/70" />
                     <span>
                       All sessions are logged and encrypted. Unauthorized access attempts are monitored and reported.
@@ -306,11 +308,11 @@ export default function AdminLoginPage() {
 function HeroStat({ icon, k, v }: { icon: React.ReactNode; k: string; v: string }) {
   return (
     <div className="rounded-2xl border border-border/80 bg-card/60 p-4">
-      <div className="flex items-center gap-2 text-muted-foreground text-[11px] uppercase tracking-[0.12em] mb-2">
+      <div className={cn(ADMIN_TYPE.labelMicro, "flex items-center gap-2 mb-2")}>
         <span className="text-primary">{icon}</span>
         <span>{v}</span>
       </div>
-      <p className="font-serif text-2xl font-semibold leading-none tracking-tight">{k}</p>
+      <p className={ADMIN_TYPE.statValue}>{k}</p>
     </div>
   );
 }

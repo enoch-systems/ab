@@ -35,7 +35,7 @@ export function AdminSearch({
         placeholder={placeholder}
         aria-label={ariaLabel}
         className={cn(
-          "w-full h-11 pl-10 pr-10 rounded-xl border border-border bg-background text-base placeholder:text-muted-foreground/70 transition sm:text-sm",
+          "w-full h-11 pl-10 pr-10 rounded-xl border border-border bg-background text-base placeholder:text-muted-foreground transition sm:text-sm",
           "focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring/50",
           "[&::-webkit-search-cancel-button]:appearance-none",
           inputClassName,

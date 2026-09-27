@@ -7,6 +7,8 @@ import { useAppState } from "@/lib/app-state";
 import { StatusBadge, formatCurrency, formatDate } from "@/components/shared/status-badge";
 import type { ShipmentStatus } from "@/lib/types";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { AdminSearch } from "@/components/shared/admin/admin-search";
 import { AdminShipmentCard } from "@/components/shared/admin/admin-shipment-card";
 import { CopyTrackingId } from "@/components/shared/copy-tracking-id";
@@ -163,9 +165,9 @@ function AdminShipmentsPageContent() {
         <div className="flex flex-col gap-2 border-t border-border/60 bg-muted/15 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4 lg:hidden">
           <div className="flex min-w-0 items-center gap-2">
             <FilterIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <p className="truncate text-sm font-medium">{f === "All" ? "All orders" : f}</p>
+            <p className={cn(ADMIN_TYPE.value, "truncate")}>{f === "All" ? "All orders" : f}</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className={cn(ADMIN_TYPE.secondary, "flex items-center gap-2")}>
             <span><span className="font-semibold text-foreground">{list.length}</span> results</span>
             {(f !== "All" || q) && (
               <button
@@ -181,7 +183,7 @@ function AdminShipmentsPageContent() {
       </section>
 
       <div className="mt-3 hidden items-center justify-between px-1 lg:flex">
-        <p className="text-sm text-muted-foreground">
+        <p className={ADMIN_TYPE.meta}>
           Showing <span className="font-semibold text-foreground">{list.length}</span> of {shipments.length} orders
         </p>
         {(f !== "All" || q) && (
@@ -200,21 +202,21 @@ function AdminShipmentsPageContent() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1080px] text-sm">
             <thead>
-              <tr className="border-b border-border/60 bg-muted/20 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-                <th className="text-left font-medium px-5 py-3.5">Tracking</th>
-                <th className="text-left font-medium px-5 py-3.5">Customer</th>
-                <th className="text-left font-medium px-5 py-3.5">Route</th>
-                <th className="text-left font-medium px-5 py-3.5">Status</th>
-                <th className="text-left font-medium px-5 py-3.5">Method</th>
-                <th className="text-left font-medium px-5 py-3.5">Created</th>
-                <th className="text-left font-medium px-5 py-3.5">ETA</th>
-                <th className="text-right font-medium px-5 py-3.5">Cost</th>
+              <tr className={cn("border-b border-border/60 bg-muted/20", ADMIN_TYPE.labelMicro)}>
+                <th className="text-left px-5 py-3.5">Tracking</th>
+                <th className="text-left px-5 py-3.5">Customer</th>
+                <th className="text-left px-5 py-3.5">Route</th>
+                <th className="text-left px-5 py-3.5">Status</th>
+                <th className="text-left px-5 py-3.5">Method</th>
+                <th className="text-left px-5 py-3.5">Created</th>
+                <th className="text-left px-5 py-3.5">ETA</th>
+                <th className="text-right px-5 py-3.5">Cost</th>
               </tr>
             </thead>
             <tbody>
               {!list.length && (
                 <tr>
-                  <td colSpan={8} className="h-40 text-center text-sm text-muted-foreground">
+                  <td colSpan={8} className={cn(ADMIN_TYPE.meta, "h-40 text-center")}>
                     No shipments match your filters.
                   </td>
                 </tr>
@@ -236,22 +238,22 @@ function AdminShipmentsPageContent() {
                           {cust?.fullName?.[0] || "?"}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium truncate leading-tight">{cust?.fullName || "—"}</p>
-                          <p className="text-xs text-muted-foreground truncate">{cust?.email}</p>
+                          <p className={cn(ADMIN_TYPE.value, "truncate")}>{cust?.fullName || "—"}</p>
+                          <p className={cn(ADMIN_TYPE.secondary, "truncate")}>{cust?.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="min-w-[180px] px-5 py-4">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <div className={cn(ADMIN_TYPE.secondary, "flex items-center gap-1.5")}>
                         <Truck className="w-3.5 h-3.5 shrink-0 opacity-70" />
                         <span>{sh.origin.split(",")[0]} → {sh.destination.split(",")[0]}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4"><StatusBadge status={sh.status} /></td>
-                    <td className="px-5 py-4 text-muted-foreground">{sh.shippingMethod}</td>
-                    <td className="px-5 py-4 text-muted-foreground">{formatDate(sh.createdAt)}</td>
-                    <td className="px-5 py-4 text-muted-foreground">{formatDate(sh.estimatedDelivery)}</td>
-                    <td className="px-5 py-4 text-right font-medium">{formatCurrency(sh.cost, sh.currency)}</td>
+                    <td className={cn("px-5 py-4 text-[13px] text-muted-foreground")}>{sh.shippingMethod}</td>
+                    <td className={cn("px-5 py-4 text-[13px] text-muted-foreground")}>{formatDate(sh.createdAt)}</td>
+                    <td className={cn("px-5 py-4 text-[13px] text-muted-foreground")}>{formatDate(sh.estimatedDelivery)}</td>
+                    <td className={cn(ADMIN_TYPE.valueSmall, "px-5 py-4 text-right font-semibold")}>{formatCurrency(sh.cost, sh.currency)}</td>
                   </tr>
                 );
               })}
@@ -263,7 +265,7 @@ function AdminShipmentsPageContent() {
       {/* Mobile shipment cards */}
       <div className="lg:hidden space-y-2.5">
         {!list.length && (
-          <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+          <div className={cn("rounded-2xl border border-border bg-card p-10 text-center", ADMIN_TYPE.meta)}>
             No shipments match.
           </div>
         )}
@@ -290,8 +292,8 @@ function AdminShipmentsPageContent() {
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/20" />
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <h3 className="font-serif text-xl">Filter orders</h3>
-                <p className="mt-1 text-xs text-muted-foreground">Choose a status to refine the list.</p>
+                <h3 className={ADMIN_TYPE.dialogTitle}>Filter orders</h3>
+                <p className={cn(ADMIN_TYPE.secondary, "mt-1")}>Choose a status to refine the list.</p>
               </div>
               <button
                 type="button"
@@ -333,8 +335,8 @@ function OrderMetric({ label, value, icon, tone }: { label: string; value: numbe
     <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm sm:p-4">
       <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone}`}>{icon}</span>
       <div className="min-w-0">
-        <p className="font-serif text-xl font-semibold leading-none sm:text-2xl">{value}</p>
-        <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+        <p className={cn(ADMIN_TYPE.statValue, "text-xl sm:text-2xl")}>{value}</p>
+        <p className={cn(ADMIN_TYPE.label, "mt-1 truncate")}>{label}</p>
       </div>
     </div>
   );

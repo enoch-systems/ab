@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { Package, ArrowRight } from "lucide-react";
 
 export default function AdminReviewsRedirect() {
@@ -19,8 +21,8 @@ export default function AdminReviewsRedirect() {
           <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
             <Package className="w-7 h-7" />
           </div>
-          <h1 className="font-serif text-2xl mb-2">Redirecting…</h1>
-          <p className="text-muted-foreground text-sm mb-5">
+          <h1 className={cn(ADMIN_TYPE.pageTitle, "mb-2")}>Redirecting…</h1>
+          <p className={cn(ADMIN_TYPE.meta, "mb-5")}>
             The Reviews section is not used by this logistics platform.
           </p>
           <Button asChild className="rounded-full h-11">

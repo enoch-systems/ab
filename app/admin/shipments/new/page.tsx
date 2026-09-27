@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAppState } from '@/lib/app-state';
 import { AdminPageHeader } from '@/components/shared/admin/admin-page-header';
+import { ADMIN_TYPE } from '@/components/shared/admin/admin-type';
 import { CustomerCombobox } from '@/components/shared/admin/customer-combobox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -199,7 +200,7 @@ export default function AdminCreateShipmentPage() {
         <div className="min-w-0 space-y-5">
           <Card className="min-w-0">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "flex items-center gap-2 sm:text-lg")}>
                 <UserRound className="h-5 w-5 shrink-0 text-primary" />
                 Customer &amp; addresses
               </CardTitle>
@@ -220,7 +221,7 @@ export default function AdminCreateShipmentPage() {
 
           <Card className="min-w-0">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "flex items-center gap-2 sm:text-lg")}>
                 <PackagePlus className="h-5 w-5 shrink-0 text-primary" />
                 Package &amp; service
               </CardTitle>
@@ -280,13 +281,13 @@ export default function AdminCreateShipmentPage() {
 
           <Card className="min-w-0">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "flex items-center gap-2 sm:text-lg")}>
                 <ImagePlus className="h-5 w-5 shrink-0 text-primary" />
                 Shipment images
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className={ADMIN_TYPE.meta}>
                 Add {1}–{MAX_IMAGES} product or packing images. Drag them in, or tap to browse. JPG, PNG or WebP, 5&nbsp;MB max each.
               </p>
 
@@ -303,7 +304,7 @@ export default function AdminCreateShipmentPage() {
                     />
                   ))}
                 </div>
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className={cn(ADMIN_TYPE.help, "font-medium")}>
                   {images.length} of {MAX_IMAGES} added
                 </p>
               </div>
@@ -336,14 +337,14 @@ export default function AdminCreateShipmentPage() {
                 >
                   {dragging ? <Upload className="h-6 w-6 animate-bounce" /> : <Images className="h-6 w-6" />}
                 </span>
-                <span className="text-sm font-medium text-foreground">
+                <span className={ADMIN_TYPE.value}>
                   {dragging
                     ? 'Drop to add images'
                     : images.length === 0
                       ? 'Drag & drop images here'
                       : 'Drop more images, or add below'}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className={ADMIN_TYPE.help}>
                   {images.length >= MAX_IMAGES
                     ? 'Limit reached — remove one to swap it out'
                     : `Select 1 to ${MAX_IMAGES} at once`}
@@ -405,10 +406,10 @@ export default function AdminCreateShipmentPage() {
                         </button>
                       </div>
                       <div className="flex items-center gap-1.5 border-t px-2 py-1.5">
-                        <p className="min-w-0 flex-1 truncate text-[10px] text-muted-foreground" title={file.name}>
+                        <p className={cn(ADMIN_TYPE.help, "min-w-0 flex-1 truncate")} title={file.name}>
                           {file.name}
                         </p>
-                        <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
+                        <span className={cn(ADMIN_TYPE.help, "shrink-0")}>
                           {formatBytes(file.size)}
                         </span>
                       </div>
@@ -441,17 +442,17 @@ export default function AdminCreateShipmentPage() {
 
         <Card className="min-w-0 lg:sticky lg:top-24">
           <CardHeader>
-            <CardTitle className="text-base sm:text-lg">Ready to create</CardTitle>
+            <CardTitle className={cn(ADMIN_TYPE.sectionTitle, "sm:text-lg")}>Ready to create</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="min-w-0 rounded-xl bg-muted/40 p-4 text-sm">
-              <p className="break-words font-medium text-foreground">{customer?.fullName || 'Select a customer'}</p>
-              <p className="mt-1 break-all text-xs text-muted-foreground sm:text-sm">
+              <p className={cn(ADMIN_TYPE.value, "break-words")}>{customer?.fullName || 'Select a customer'}</p>
+              <p className={cn(ADMIN_TYPE.secondary, "mt-1 break-all")}>
                 {customer?.email || 'No customer selected'}
               </p>
             </div>
 
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
+            <ul className={cn(ADMIN_TYPE.meta, "space-y-2.5")}>
               {checklist.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-start gap-2.5">
                   <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -474,7 +475,7 @@ export default function AdminCreateShipmentPage() {
               )}
             </Button>
 
-            <p className="flex items-start gap-2 text-xs text-muted-foreground">
+            <p className={cn(ADMIN_TYPE.help, "flex items-start gap-2")}>
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
               <span className="min-w-0 break-words">Only administrators can create or change shipment records.</span>
             </p>
@@ -498,7 +499,7 @@ function AddressFields({
 }) {
   return (
     <fieldset className="min-w-0 rounded-xl border p-3 sm:p-4">
-      <legend className="px-1 text-sm font-semibold">{title}</legend>
+      <legend className={cn(ADMIN_TYPE.value, "px-1")}>{title}</legend>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field id={`${id}-name`} label="Full name">
           <Input id={`${id}-name`} autoComplete="name" value={value.name} onChange={(e) => onChange('name', e.target.value)} className={CONTROL} required />

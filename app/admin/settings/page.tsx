@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppState } from "@/lib/app-state";
 import { AdminPageHeader } from "@/components/shared/admin/admin-page-header";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -112,8 +114,8 @@ export default function AdminSettingsPage() {
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><UserRound className="h-5 w-5" /></div>
               <div className="min-w-0">
-                <CardTitle className="font-serif text-xl">Profile details</CardTitle>
-                <CardDescription className="mt-1">Review your admin identity. Supabase Auth controls sign-in identity; phone is editable here.</CardDescription>
+                <CardTitle className={ADMIN_TYPE.dialogTitle}>Profile details</CardTitle>
+                <CardDescription className={cn(ADMIN_TYPE.panelSubtitle, "mt-1")}>Review your admin identity. Supabase Auth controls sign-in identity; phone is editable here.</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -125,7 +127,7 @@ export default function AdminSettingsPage() {
               <div className="flex items-center gap-4 px-6 py-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"><Phone className="h-4 w-4" /></div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Phone number</p>
+                  <p className={ADMIN_TYPE.label}>Phone number</p>
                   {editingPhone ? (
                     <div className="mt-2 flex flex-col gap-2 sm:flex-row">
                       <Input
@@ -172,8 +174,8 @@ export default function AdminSettingsPage() {
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-300"><KeyRound className="h-5 w-5" /></div>
               <div className="min-w-0">
-                <CardTitle className="font-serif text-xl">Change password</CardTitle>
-                <CardDescription className="mt-1">Use at least 8 characters. Your new password will be required next time you sign in.</CardDescription>
+                <CardTitle className={ADMIN_TYPE.dialogTitle}>Change password</CardTitle>
+                <CardDescription className={cn(ADMIN_TYPE.panelSubtitle, "mt-1")}>Use at least 8 characters. Your new password will be required next time you sign in.</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -194,8 +196,8 @@ export default function AdminSettingsPage() {
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive"><LogOut className="h-5 w-5" /></div>
               <div className="min-w-0">
-                <CardTitle className="font-serif text-xl">Sign out of admin</CardTitle>
-                <CardDescription className="mt-1">End this session and return to the admin sign-in screen.</CardDescription>
+                <CardTitle className={ADMIN_TYPE.dialogTitle}>Sign out of admin</CardTitle>
+                <CardDescription className={cn(ADMIN_TYPE.panelSubtitle, "mt-1")}>End this session and return to the admin sign-in screen.</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -231,9 +233,9 @@ function DetailRow({ icon, label, value, hint }: { icon: React.ReactNode; label:
     <div className="flex items-center gap-4 px-6 py-4">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">{icon}</div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-sm font-medium text-foreground">{valueOrDash(value)}</p>
-        {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}
+        <p className={ADMIN_TYPE.label}>{label}</p>
+        <p className={cn(ADMIN_TYPE.value, "mt-1 truncate")}>{valueOrDash(value)}</p>
+        {hint ? <p className={cn(ADMIN_TYPE.help, "mt-0.5")}>{hint}</p> : null}
       </div>
     </div>
   );
@@ -244,8 +246,8 @@ function SummaryCell({ icon, label, value }: { icon: React.ReactNode; label: str
     <div className="flex items-center gap-3 bg-card px-6 py-4">
       <div className="text-muted-foreground">{icon}</div>
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-sm font-medium text-foreground">{valueOrDash(value)}</p>
+        <p className={ADMIN_TYPE.labelMicro}>{label}</p>
+        <p className={cn(ADMIN_TYPE.value, "mt-1 truncate")}>{valueOrDash(value)}</p>
       </div>
     </div>
   );
@@ -254,7 +256,7 @@ function SummaryCell({ icon, label, value }: { icon: React.ReactNode; label: str
 function PasswordField({ label, id, value, onChange, visible, onToggle, autoComplete }: { label: string; id: string; value: string; onChange: (value: string) => void; visible: boolean; onToggle: () => void; autoComplete: string }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"><KeyRound className="h-4 w-4" />{label}</Label>
+      <Label htmlFor={id} className={ADMIN_TYPE.label}><KeyRound className="h-4 w-4" />{label}</Label>
       <div className="relative">
         <Input id={id} type={visible ? "text" : "password"} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} className="pr-11" required />
         <button type="button" onClick={onToggle} aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`} className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground">

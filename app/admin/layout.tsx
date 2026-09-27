@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAppState } from "@/lib/app-state";
 import { AdminShell } from "@/components/shared/admin/admin-shell";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
+import { cn } from "@/lib/utils";
 import { Loader2, Shield, Lock } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -38,8 +40,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <Shield className="h-8 w-8" />
               </div>
-              <h1 className="mb-2 font-serif text-2xl">Admin Access Required</h1>
-              <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+              <h1 className={cn(ADMIN_TYPE.pageTitle, "mb-2")}>Admin Access Required</h1>
+              <p className={cn(ADMIN_TYPE.meta, "mb-6")}>
                 This area is restricted to administrators. Please sign in to continue.
               </p>
               <div className="flex flex-col justify-center gap-2 sm:flex-row">

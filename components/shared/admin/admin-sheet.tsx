@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 
 interface AdminBottomSheetProps {
   open: boolean;
@@ -49,8 +50,8 @@ export function AdminBottomSheet({
       >
         <div className="sticky top-0 bg-card/95 backdrop-blur z-10 px-4 pt-3 pb-2 border-b border-border/50">
           <div className="w-10 h-1 rounded-full bg-muted-foreground/20 mx-auto mb-3" />
-          {title && <h3 className="font-serif text-lg leading-tight">{title}</h3>}
-          {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+          {title && <h3 className={ADMIN_TYPE.dialogTitle}>{title}</h3>}
+          {description && <p className={cn(ADMIN_TYPE.secondary, "mt-1")}>{description}</p>}
         </div>
         <div className="p-4 pb-8">{children}</div>
         {footer && <div className="px-4 pb-safe border-t border-border/50 pt-3">{footer}</div>}
