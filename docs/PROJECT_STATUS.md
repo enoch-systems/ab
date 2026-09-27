@@ -1,6 +1,6 @@
 # ABOMA Implementation Status
 
-Last updated: 2026-09-25
+Last updated: 2026-09-27
 
 This file records the current implementation and launch-readiness checklist for the ABOMA/ArcBest logistics platform.
 
@@ -17,6 +17,7 @@ This file records the current implementation and launch-readiness checklist for 
 - [DONE] Shipment image Storage bucket and uploads
 - [DONE] Shipment-created Resend email endpoint (requires Resend environment variables)
 - [DONE] Public tracking API and saved tracking IDs
+- [DONE] Supabase keep-alive heartbeat (`app/api/keepalive`) — Vercel Cron daily + cron-job.org twice-daily; prevents the free-tier inactivity pause
 
 ## Partially done
 
@@ -43,7 +44,7 @@ This file records the current implementation and launch-readiness checklist for 
 - [UNDONE] Upstash rate limiting
 - [UNDONE] Sentry
 - [UNDONE] Stuck-shipment job
-- [UNDONE] Uptime monitoring/status page
+- [PARTIAL] Uptime monitoring (keep-alive ping + failure emails; no status page yet)
 - [UNDONE] Legal pages/cookie banner
 - [UNDONE] SEO updates
 - [UNDONE] PostHog
