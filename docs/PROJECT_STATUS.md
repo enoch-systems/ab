@@ -17,7 +17,7 @@ This file records the current implementation and launch-readiness checklist for 
 - [DONE] Shipment image Storage bucket and uploads
 - [DONE] Shipment-created Resend email endpoint (requires Resend environment variables)
 - [DONE] Public tracking API and saved tracking IDs
-- [DONE] Supabase keep-alive heartbeat (`app/api/keepalive`) — Vercel Cron daily + cron-job.org twice-daily; prevents the free-tier inactivity pause
+- [DONE] Supabase keep-alive heartbeat (`app/api/keepalive`) — Vercel Cron twice daily + GitHub Actions backup twice daily; prevents the free-tier inactivity pause
 
 ## Partially done
 
