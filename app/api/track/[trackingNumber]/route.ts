@@ -28,7 +28,6 @@ export async function GET(
     ...model,
     customerId: '',
     instructions: undefined,
-    cost: 0,
     sender: { name: '', phone: '', email: '', address: '', city: model.origin.split(',')[0]?.trim() || '', state: '', country: '' },
     recipient: { name: '', phone: '', email: '', address: '', city: model.destination.split(',')[0]?.trim() || '', state: '', country: '' },
   };

@@ -19,6 +19,7 @@ import { describeEta, describeLastUpdate, routeProgress, scanStats } from "@/lib
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   CalendarClock,
   Check,
   ChevronDown,
@@ -330,6 +331,18 @@ export default function TrackingPage() {
               {/* The same origin → rail → destination the operations console shows,
                   with the identical completion percentage and leg caption. */}
               <ShipmentRouteRail shipment={shipment} className="mt-6" />
+
+              <div className="mt-5 flex items-center justify-between gap-3 border-t border-border/70 pt-4">
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Banknote className="h-4 w-4" /> Estimated price
+                </span>
+                <span className="font-mono text-base font-semibold text-foreground">
+                  {new Intl.NumberFormat(undefined, {
+                    style: "currency",
+                    currency: shipment.currency || "USD",
+                  }).format(shipment.cost)}
+                </span>
+              </div>
 
               <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
