@@ -1,5 +1,6 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster } from '@/components/ui/sonner'
@@ -8,6 +9,7 @@ import { LenisProvider } from '@/components/providers/lenis-provider'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '@/components/providers/theme-provider'
 import { AppStateProvider } from '@/lib/app-state'
 import { BRAND_LOGO_URL } from '@/components/shared/brand-logo'
+import { LiveChatWidget } from '@/components/shared/live-chat'
 import { COMPANY_ADDRESS, COMPANY_MAPS_URL } from '@/lib/site'
 import './globals.css'
 
@@ -89,6 +91,58 @@ export default function RootLayout({
             effect: by the time any `useEffect` runs, the browser has already
             painted the wrong theme. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <Script id="smartsupp-live-chat" strategy="beforeInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            var _smartsupp = _smartsupp || {};
+            _smartsupp.key = '86ae2f7261408505bf9445e2517db0ef57db95ba';
+            window.smartsupp || (function(d) {
+              var s, c, o = window.smartsupp = function(){ o._.push(arguments) };
+              o._ = [];
+              s = d.getElementsByTagName('script')[0];
+              c = d.createElement('script');
+              c.type = 'text/javascript';
+              c.charset = 'utf-8';
+              c.async = true;
+              c.src = 'https://www.smartsuppchat.com/loader.js?';
+              s.parentNode.insertBefore(c, s);
+            })(document);
+          `,
+        }} />
+        <Script id="smartsupp-branding-hide" strategy="afterInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            (function () {
+              function hideSmartsuppBranding() {
+                var all = Array.prototype.slice.call(document.querySelectorAll('*'));
+
+                all.forEach(function (el) {
+                  var text = (el.textContent || '').trim();
+                  var href = (el.getAttribute('href') || '').toLowerCase();
+
+                  if (
+                    href.indexOf('smartsupp.com') !== -1 ||
+                    href.indexOf('smartsuppchat.com') !== -1 ||
+                    /powered by\s*smartsupp|smartsupp/i.test(text)
+                  ) {
+                    el.style.display = 'none';
+                    el.style.visibility = 'hidden';
+                    el.setAttribute('aria-hidden', 'true');
+                  }
+                });
+              }
+
+              hideSmartsuppBranding();
+              if (typeof MutationObserver !== 'undefined') {
+                var observer = new MutationObserver(hideSmartsuppBranding);
+                observer.observe(document.body || document.documentElement, {
+                  childList: true,
+                  subtree: true,
+                  attributes: true,
+                  characterData: true,
+                });
+              }
+            })();
+          `,
+        }} />
         {/* Machine-readable headquarters address, built from the same constants
             as the visible footer/contact copy. */}
         <script
@@ -100,6 +154,9 @@ export default function RootLayout({
           per-element overflow guard is needed here (and `overflow-x-hidden`
           would turn `body` into a scrollport, breaking `sticky` children). */}
       <body className="font-sans antialiased">
+        <noscript>
+          Powered by <a href="https://www.smartsupp.com" target="_blank" rel="noopener noreferrer">Smartsupp</a>
+        </noscript>
         <ThemeProvider>
           <AppStateProvider>
             <LenisProvider>
@@ -109,6 +166,7 @@ export default function RootLayout({
           {/* Inside the provider so toasts pick up the active theme. */}
           <Toaster />
         </ThemeProvider>
+        <LiveChatWidget />
         <Analytics />
         {/* Real-user Core Web Vitals (LCP / INP / CLS) so regressions are visible
             instead of guessed at. */}
