@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { LiveChatWidget } from "@/components/shared/live-chat"
 import { ChevronDown, Search } from "lucide-react"
 
 const faqCategories = [
@@ -158,7 +157,6 @@ export default function FAQPage() {
         </div>
       </div>
       <Footer />
-      <LiveChatWidget />
     </main>
   )
 }

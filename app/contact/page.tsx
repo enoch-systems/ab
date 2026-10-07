@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/footer"
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Headphones, ExternalLink } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { openLiveChat, LiveChatWidget } from "@/components/shared/live-chat"
+import { openLiveChat } from "@/components/shared/live-chat"
 import { COMPANY_MAPS_URL } from "@/lib/site"
 
 const contactChannels = [
@@ -182,7 +182,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-      <LiveChatWidget />
       <Footer />
     </main>
   )

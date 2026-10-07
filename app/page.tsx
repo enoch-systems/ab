@@ -13,7 +13,6 @@ import {
 import { SmartVideo } from "@/components/media/smart-video"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { LiveChatWidget } from "@/components/shared/live-chat"
 
 function useOnVisible<T extends HTMLElement>(options = {}) {
   const ref = useRef<T | null>(null)
@@ -847,7 +846,6 @@ export default function HomePage() {
       <FAQSection />
       <CTA />
       <Footer />
-      <LiveChatWidget />
     </main>
   )
 }

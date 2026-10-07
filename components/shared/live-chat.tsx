@@ -1,7 +1,6 @@
 "use client"
 
-import { MessageCircleMore } from "lucide-react"
-import { useEffect, useState } from "react"
+import { MessageCircle } from "lucide-react"
 
 export const LIVE_CHAT_TOGGLE_EVENT = "logix:toggle-live-chat"
 
@@ -19,27 +18,17 @@ export function openLiveChat() {
   }
 }
 
-/** Visible launch button so public pages always expose support immediately. */
+/** Always-visible launcher for the Smartsupp chat UI. */
 export function LiveChatWidget() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <button
-        type="button"
-        onClick={openLiveChat}
-        className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-[0_20px_50px_-16px_rgba(59,130,246,0.65)] transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        aria-label="Open live chat"
-      >
-        <MessageCircleMore className="h-4 w-4" />
-        <span>Live chat</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={openLiveChat}
+      aria-label="Open live chat"
+      title="Open live chat"
+      className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-[90] flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 transition-transform hover:scale-105 active:scale-95 sm:bottom-6 sm:right-6"
+    >
+      <MessageCircle className="size-6" aria-hidden="true" />
+    </button>
   )
 }

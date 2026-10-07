@@ -108,41 +108,6 @@ export default function RootLayout({
             })(document);
           `,
         }} />
-        <Script id="smartsupp-branding-hide" strategy="afterInteractive" dangerouslySetInnerHTML={{
-          __html: `
-            (function () {
-              function hideSmartsuppBranding() {
-                var all = Array.prototype.slice.call(document.querySelectorAll('*'));
-
-                all.forEach(function (el) {
-                  var text = (el.textContent || '').trim();
-                  var href = (el.getAttribute('href') || '').toLowerCase();
-
-                  if (
-                    href.indexOf('smartsupp.com') !== -1 ||
-                    href.indexOf('smartsuppchat.com') !== -1 ||
-                    /powered by\s*smartsupp|smartsupp/i.test(text)
-                  ) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
-                    el.setAttribute('aria-hidden', 'true');
-                  }
-                });
-              }
-
-              hideSmartsuppBranding();
-              if (typeof MutationObserver !== 'undefined') {
-                var observer = new MutationObserver(hideSmartsuppBranding);
-                observer.observe(document.body || document.documentElement, {
-                  childList: true,
-                  subtree: true,
-                  attributes: true,
-                  characterData: true,
-                });
-              }
-            })();
-          `,
-        }} />
         {/* Machine-readable headquarters address, built from the same constants
             as the visible footer/contact copy. */}
         <script
@@ -165,8 +130,8 @@ export default function RootLayout({
           </AppStateProvider>
           {/* Inside the provider so toasts pick up the active theme. */}
           <Toaster />
+          <LiveChatWidget />
         </ThemeProvider>
-        <LiveChatWidget />
         <Analytics />
         {/* Real-user Core Web Vitals (LCP / INP / CLS) so regressions are visible
             instead of guessed at. */}
