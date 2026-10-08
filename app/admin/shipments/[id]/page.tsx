@@ -49,11 +49,17 @@ import {
 import { cn } from "@/lib/utils";
 import { ADMIN_TYPE } from "@/components/shared/admin/admin-type";
 import { toast } from "sonner";
+import { getSupabaseBrowser } from "@/lib/supabase/client";
+import { broadcastShipmentChange } from "@/lib/supabase/broadcast";
 import {
   AlertTriangle, ArrowLeft, ArrowRight, Banknote, Building2, Check, CheckCircle2, ChevronDown,
-  CircleDot, Clock, Edit3, Hash, History, Loader2, Mail, MapPin, Package, Phone, Scale, Send,
-  Truck, User, Users, Ruler,
+  CircleDot, Clock, Edit3, Hash, History, ImagePlus, Loader2, Mail, MapPin, Package, Phone, Scale, Send,
+  Trash2, Truck, User, Users, Ruler,
 } from "lucide-react";
+
+const MAX_SHIPMENT_IMAGES = 3;
+const MAX_SHIPMENT_IMAGE_BYTES = 5 * 1024 * 1024;
+const SHIPMENT_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 /** How long the busy state stays visible so the change is readable on screen. */
 const PULSE_MS = 420;
@@ -77,10 +83,12 @@ export default function AdminShipmentDetailPage() {
   const [announcement, setAnnouncement] = useState("");
   const [statusOpen, setStatusOpen] = useState(false);
   const [drafts, setDrafts] = useState({ destination: "", address: "", currentLocation: "" });
+  const [imageBusy, setImageBusy] = useState(false);
 
   const applyTimer = useRef<number | null>(null);
   const locationTimer = useRef<number | null>(null);
   const flashTimer = useRef<number | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(
     () => () => {
@@ -127,6 +135,123 @@ export default function AdminShipmentDetailPage() {
 
   const advanceStatus: ShipmentStatus | null =
     shipment && stageIndex >= 0 && stageIndex < LAST_JOURNEY_INDEX ? SHIPMENT_JOURNEY[stageIndex + 1] : null;
+
+  const addImages = async (fileList: FileList | null) => {
+    if (!shipment || !fileList?.length) return;
+    const existingImages = shipment.images ?? [];
+    const availableSlots = MAX_SHIPMENT_IMAGES - existingImages.length;
+    if (availableSlots <= 0) {
+      toast.error(`A shipment can have at most ${MAX_SHIPMENT_IMAGES} images.`);
+      return;
+    }
+
+    const accepted: File[] = [];
+    const rejected: string[] = [];
+    let overflow = 0;
+    for (const file of Array.from(fileList)) {
+      if (!SHIPMENT_IMAGE_TYPES.has(file.type)) {
+        rejected.push(`${file.name} is not a supported image type`);
+      } else if (file.size > MAX_SHIPMENT_IMAGE_BYTES) {
+        rejected.push(`${file.name} is larger than 5 MB`);
+      } else if (accepted.length >= availableSlots) {
+        overflow += 1;
+      } else {
+        accepted.push(file);
+      }
+    }
+
+    if (!accepted.length) {
+      toast.error(rejected[0] ?? `Only ${availableSlots} more image${availableSlots === 1 ? "" : "s"} can be added.`);
+      return;
+    }
+    if (rejected.length) toast.warning(`Skipped ${rejected.length} file(s): ${rejected[0]}.`);
+    if (overflow) toast.warning(`Skipped ${overflow}; a shipment can have at most ${MAX_SHIPMENT_IMAGES} images.`);
+
+    const client = getSupabaseBrowser();
+    if (!client) {
+      toast.error("Image storage is not configured.");
+      return;
+    }
+
+    setImageBusy(true);
+    const uploadedPaths: string[] = [];
+    try {
+      const imageRows = [];
+      for (const [index, file] of accepted.entries()) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const path = `${shipment.id}/${Date.now()}-${index}-${safeName}`;
+        const { error: uploadError } = await client.storage
+          .from("shipment-images")
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+        uploadedPaths.push(path);
+
+        const { data: imageData } = client.storage.from("shipment-images").getPublicUrl(path);
+        imageRows.push({
+          shipment_id: shipment.id,
+          storage_path: path,
+          public_url: imageData.publicUrl,
+          alt_text: file.name,
+          sort_order: existingImages.length + index,
+        });
+      }
+
+      const { error: insertError } = await client.from("shipment_images").insert(imageRows);
+      if (insertError) throw new Error(`Could not save image details: ${insertError.message}`);
+
+      await broadcastShipmentChange(client, shipment.trackingNumber, "images");
+      toast.success(accepted.length === 1 ? "Image added." : `${accepted.length} images added.`);
+    } catch (error) {
+      if (uploadedPaths.length) {
+        await client.storage.from("shipment-images").remove(uploadedPaths);
+      }
+      toast.error(error instanceof Error ? error.message : "Could not add shipment images.");
+    } finally {
+      setImageBusy(false);
+    }
+  };
+
+  const removeImage = async (imageId: string, storagePath: string) => {
+    if (!shipment) return;
+    const images = shipment.images ?? [];
+    if (images.length <= 1) {
+      toast.error("A shipment must keep at least one image.");
+      return;
+    }
+    if (!window.confirm("Remove this image from the shipment?")) return;
+
+    const client = getSupabaseBrowser();
+    if (!client) {
+      toast.error("Image storage is not configured.");
+      return;
+    }
+
+    setImageBusy(true);
+    try {
+      const { data: deletedImage, error: deleteError } = await client
+        .from("shipment_images")
+        .delete()
+        .eq("id", imageId)
+        .eq("shipment_id", shipment.id)
+        .select("id")
+        .maybeSingle();
+      if (deleteError || !deletedImage) {
+        throw new Error(deleteError?.message ?? "Could not remove this image from the shipment.");
+      }
+
+      const { error: storageError } = await client.storage.from("shipment-images").remove([storagePath]);
+      await broadcastShipmentChange(client, shipment.trackingNumber, "images");
+      if (storageError) {
+        toast.warning("Image removed from the shipment, but its stored file could not be deleted.");
+      } else {
+        toast.success("Image removed.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not remove this image.");
+    } finally {
+      setImageBusy(false);
+    }
+  };
 
   /** What the pending change will do, previewed before it is applied. */
   const pendingPreview = useMemo(() => {
@@ -510,10 +635,7 @@ export default function AdminShipmentDetailPage() {
           title="Package & cost"
           subtitle={`${shipment.packageCount} × ${shipment.packageType} · ${shipment.shippingMethod}`}
           icon={<Package className="h-4 w-4" />}
-          className={cn(
-            "animate-rise-in",
-            shipment.images?.length ? "lg:col-span-7" : "lg:col-span-12",
-          )}
+          className="animate-rise-in lg:col-span-7"
           contentClassName="p-4 sm:p-5 space-y-4"
         >
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2.5">
@@ -555,34 +677,72 @@ export default function AdminShipmentDetailPage() {
           )}
         </AdminPanel>
 
-        {shipment.images && shipment.images.length > 0 && (
-          <AdminPanel
-            title="Product & packing images"
-            subtitle={`${shipment.images.length} uploaded with this order`}
-            icon={<Package className="h-4 w-4" />}
-            className="animate-rise-in lg:col-span-5"
-            contentClassName="p-3 sm:p-4"
-          >
-            <div className="grid grid-cols-3 gap-2">
-              {shipment.images.map((image) => (
-                <a
-                  key={image.id}
-                  href={image.publicUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group block overflow-hidden rounded-xl border border-border/70"
-                >
-                  <img
-                    src={image.publicUrl}
-                    alt={image.altText}
-                    loading="lazy"
-                    className="aspect-square w-full object-cover transition duration-300 group-hover:scale-[1.04]"
-                  />
-                </a>
+        <AdminPanel
+          title="Product & packing images"
+          subtitle={`${shipment.images?.length ?? 0} of ${MAX_SHIPMENT_IMAGES} images · at least 1 required`}
+          icon={<Package className="h-4 w-4" />}
+          action={(
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={imageBusy || (shipment.images?.length ?? 0) >= MAX_SHIPMENT_IMAGES}
+              onClick={() => imageInputRef.current?.click()}
+              className="h-9 gap-1.5 px-2.5 text-xs sm:px-3 sm:text-sm"
+            >
+              {imageBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+              Add image
+            </Button>
+          )}
+          className="animate-rise-in lg:col-span-5"
+          contentClassName="p-3 sm:p-4"
+        >
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            aria-label="Add shipment images"
+            className="sr-only"
+            onChange={(event) => {
+              void addImages(event.currentTarget.files);
+              event.currentTarget.value = "";
+            }}
+          />
+          <p className="mb-3 text-xs text-muted-foreground">
+            JPG, PNG, or WebP · up to 5 MB each · maximum {MAX_SHIPMENT_IMAGES} images
+          </p>
+          {shipment.images?.length ? (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {shipment.images.map((image, index) => (
+                <div key={image.id} className="group relative overflow-hidden rounded-xl border border-border/70">
+                  <a href={image.publicUrl} target="_blank" rel="noreferrer" className="block">
+                    <img
+                      src={image.publicUrl}
+                      alt={image.altText}
+                      loading="lazy"
+                      className="aspect-square w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+                    />
+                  </a>
+                  <button
+                    type="button"
+                    disabled={imageBusy || (shipment.images?.length ?? 0) <= 1}
+                    onClick={() => void removeImage(image.id, image.storagePath)}
+                    aria-label={`Remove image ${index + 1}`}
+                    title={(shipment.images?.length ?? 0) <= 1 ? "At least one image is required" : "Remove image"}
+                    className="absolute right-1.5 top-1.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background/90 text-foreground shadow-sm backdrop-blur transition hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {imageBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  </button>
+                </div>
               ))}
             </div>
-          </AdminPanel>
-        )}
+          ) : (
+            <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
+              No images attached. Add at least one image to this shipment.
+            </p>
+          )}
+        </AdminPanel>
       </div>
 
       {/* Status update dialog — everything behind it stays blurred while it's open */}

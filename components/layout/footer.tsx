@@ -7,7 +7,7 @@ import { Phone, Mail, MapPin, ChevronRight, ExternalLink } from "lucide-react"
 import { useAppState } from "@/lib/app-state"
 import { PolicyModal } from "@/components/shared/policy-modal"
 import { BrandLogo } from "@/components/shared/brand-logo"
-import { COMPANY_ADDRESS_LINE, COMPANY_MAPS_URL } from "@/lib/site"
+import { COMPANY_ADDRESS_LINE, COMPANY_EMAIL, COMPANY_MAPS_URL, COMPANY_PHONE, COMPANY_PHONE_DISPLAY } from "@/lib/site"
 
 const footerLinks = {
   company: [
@@ -69,11 +69,11 @@ export function Footer() {
             <div className="space-y-3 mb-6 text-sm text-muted-foreground">
               <div className="flex items-start gap-3">
                 <Phone className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-                <a href="tel:+18005550147" className="hover:text-primary boty-transition">+1 (800) 555-0147</a>
+                <a href={`tel:${COMPANY_PHONE}`} className="hover:text-primary boty-transition">{COMPANY_PHONE_DISPLAY}</a>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-                <a href="mailto:support@arcbest.com" className="hover:text-primary boty-transition">support@arcbest.com</a>
+                <a href={`mailto:${COMPANY_EMAIL}`} className="hover:text-primary boty-transition">{COMPANY_EMAIL}</a>
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-primary" />

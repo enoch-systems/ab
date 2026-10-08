@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { X, Copy, Check } from "lucide-react"
+import { COMPANY_EMAIL, COMPANY_PHONE_DISPLAY } from "@/lib/site"
 
 type ModalType = "privacy" | "terms" | "shipping" | "about"
 
@@ -33,7 +34,7 @@ Our Numbers
 We exist to make shipping simple. Wherever your cargo needs to go, ArcBest gets it there and keeps you informed at every step.
 
 Talk to us
-Questions about your freight, customs documentation or corporate rates? Email support@arcbest.com or call +1 (800) 555-0147 and our team will take it from there.`
+Questions about your freight, customs documentation or corporate rates? Email ${COMPANY_EMAIL} or call ${COMPANY_PHONE_DISPLAY} and our team will take it from there.`
   },
   privacy: {
     title: "Privacy Policy",
@@ -51,7 +52,7 @@ We take reasonable steps to protect customer information and maintain the securi
 Contact
 Customers should contact our customer service team if they have questions regarding their personal information or its use.
 
-Customer service email: support@arcbest.com`
+Customer service email: ${COMPANY_EMAIL}`
   },
   terms: {
     title: "Terms of Service",
@@ -71,15 +72,15 @@ Ready to Ship Wigs
 Eligible ready to ship wigs may be returned for store credit or exchanged within 7 days of delivery. A 25% restocking fee applies. The security tag must remain fully intact. The lace must completely remain uncut. The wig must be completely unworn. The wig must be free from perfumes, smoke, glue, or other smells. The customer is responsible for tracked return shipping.
 
 Return Process
-To request support, customers must contact support@arcbest.com with their order or shipment number. The support team will provide the next steps and any required return or claim instructions.
+To request support, customers must contact ${COMPANY_EMAIL} with their order or shipment number. The support team will provide the next steps and any required return or claim instructions.
 
 Damaged or Defective Items
-Customers should inspect packages promptly after delivery. If a shipment arrives damaged or incomplete, contact support@arcbest.com promptly with the shipment number and clear photos of the package and contents so the claim can be reviewed.
+Customers should inspect packages promptly after delivery. If a shipment arrives damaged or incomplete, contact ${COMPANY_EMAIL} promptly with the shipment number and clear photos of the package and contents so the claim can be reviewed.
 
 Our Error Policy
 If the store sends the wrong item, the customer may qualify for a resolution under the "Our Error" policy. Qualifying errors are strictly limited to: Wrong Item Sent — the customer received a completely different wig style or texture from what is listed on the original invoice. Wrong Cap Size Sent — the customer ordered a specific cap size but received a different cap size. This policy applies to custom orders and does not apply to ready to ship or sale items.
 
-To qualify for review, the customer must contact ArcBest promptly through support@arcbest.com and provide the shipment number, clear photos, and any other requested evidence.
+To qualify for review, the customer must contact ArcBest promptly through ${COMPANY_EMAIL} and provide the shipment number, clear photos, and any other requested evidence.
 
 If the store confirms that the error was made by the store, prepaid return shipping will be provided and a replacement will be issued after the returned unit is received and inspected.
 
@@ -108,7 +109,7 @@ Tracking
 All deliveries are handled through DHL. Tracking numbers will be provided after the order has been processed.
 
 Customer Service
-For any shipping-related inquiries, reach out to us at support@arcbest.com.`
+For any shipping-related inquiries, reach out to us at ${COMPANY_EMAIL}.`
   }
 }
 

@@ -6,22 +6,22 @@ import { Phone, Mail, MapPin, Clock, MessageCircle, Send, Headphones, ExternalLi
 import { useState } from "react"
 import { toast } from "sonner"
 import { openLiveChat } from "@/components/shared/live-chat"
-import { COMPANY_MAPS_URL } from "@/lib/site"
+import { COMPANY_EMAIL, COMPANY_MAPS_URL, COMPANY_PHONE, COMPANY_PHONE_DISPLAY } from "@/lib/site"
 
 const contactChannels = [
   {
     name: "Phone",
     icon: Phone,
-    primary: "+1 (800) 555-0147",
+    primary: COMPANY_PHONE_DISPLAY,
     secondary: "Mon – Sun · 24/7",
-    href: "tel:+18005550147",
+    href: `tel:${COMPANY_PHONE}`,
   },
   {
     name: "Email",
     icon: Mail,
-    primary: "support@arcbest.com",
+    primary: COMPANY_EMAIL,
     secondary: "Reply within 2 hours",
-    href: "mailto:support@arcbest.com",
+    href: `mailto:${COMPANY_EMAIL}`,
   },
   {
     name: "Live Chat",

@@ -26,6 +26,10 @@ export const COMPANY_ADDRESS_LINE = [
   COMPANY_ADDRESS.country,
 ].join(", ")
 
+export const COMPANY_PHONE = "+18147809014"
+export const COMPANY_PHONE_DISPLAY = "+1 (814) 780-9014"
+export const COMPANY_EMAIL = "arcebestlogistics@outlook.com"
+
 /**
  * Google Maps link for the headquarters.
  *

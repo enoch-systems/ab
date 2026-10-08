@@ -13,6 +13,7 @@ import {
 import { SmartVideo } from "@/components/media/smart-video"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
+import { COMPANY_PHONE } from "@/lib/site"
 
 function useOnVisible<T extends HTMLElement>(options = {}) {
   const ref = useRef<T | null>(null)
@@ -814,7 +815,7 @@ function CTA() {
                   <UserRoundPlus className="w-4 h-4" /> Create Account
                 </Link>
                 <a
-                  href="tel:+18005550147"
+                  href={`tel:${COMPANY_PHONE}`}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-transparent px-6 py-3.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 dark:border-white/25 dark:text-white dark:hover:bg-white/10 sm:w-auto sm:text-base"
                 >
                   <Headphones className="w-4 h-4" /> Talk to Sales

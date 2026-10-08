@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ChevronDown, Search } from "lucide-react"
+import { COMPANY_EMAIL, COMPANY_PHONE, COMPANY_PHONE_DISPLAY } from "@/lib/site"
 
 const faqCategories = [
   {
@@ -45,7 +46,7 @@ const faqCategories = [
     title: "Business Accounts & Bulk Shipping",
     questions: [
       { q: "Do you offer corporate rates?", a: "For high-volume shippers (20+ shipments / month) we offer custom pricing, volume discounts up to 35%, dedicated account managers, weekly invoicing, and API / Excel bulk upload integrations." },
-      { q: "Can I import goods using ArcBest?", a: "Yes. We provide end-to-end international shipping services including overseas pickup, freight coordination, customs documentation, and final-mile delivery. Contact sales@arcbest.com for a quote." },
+      { q: "Can I import goods using ArcBest?", a: `Yes. We provide end-to-end international shipping services including overseas pickup, freight coordination, customs documentation, and final-mile delivery. Contact ${COMPANY_EMAIL} for a quote.` },
     ]
   },
   {
@@ -56,6 +57,16 @@ const faqCategories = [
     ]
   },
 ]
+
+function linkEmails(text: string) {
+  return text.split(/([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/gi).map((part, index) =>
+    part.includes("@") ? (
+      <a key={index} href={`mailto:${part}`} className="font-medium text-primary underline underline-offset-2">
+        {part}
+      </a>
+    ) : part,
+  )
+}
 
 export default function FAQPage() {
   const [search, setSearch] = useState('')
@@ -128,7 +139,7 @@ export default function FAQPage() {
                           <ChevronDown className={`w-5 h-5 text-muted-foreground flex-shrink-0 boty-transition ${open ? 'rotate-180' : ''}`} />
                         </summary>
                         <div className="px-5 sm:px-6 pb-5 sm:pb-6">
-                          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{item.a}</p>
+                          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{linkEmails(item.a)}</p>
                         </div>
                       </details>
                     )
@@ -146,11 +157,11 @@ export default function FAQPage() {
               Can't find the answer you're looking for? Reach out to our friendly support team, 24/7.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="mailto:support@arcbest.com" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 rounded-full text-sm tracking-wide boty-transition hover:bg-primary/90 cursor-pointer">
+              <a href={`mailto:${COMPANY_EMAIL}`} className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 rounded-full text-sm tracking-wide boty-transition hover:bg-primary/90 cursor-pointer">
                 Email Support
               </a>
-              <a href="tel:+18005550147" className="inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground px-8 py-3.5 rounded-full text-sm tracking-wide boty-transition hover:bg-accent/10 cursor-pointer">
-                Call +1 (800) 555-0147
+              <a href={`tel:${COMPANY_PHONE}`} className="inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground px-8 py-3.5 rounded-full text-sm tracking-wide boty-transition hover:bg-accent/10 cursor-pointer">
+                Call {COMPANY_PHONE_DISPLAY}
               </a>
             </div>
           </div>

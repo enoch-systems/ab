@@ -9,8 +9,7 @@ import { LenisProvider } from '@/components/providers/lenis-provider'
 import { ThemeProvider, THEME_INIT_SCRIPT } from '@/components/providers/theme-provider'
 import { AppStateProvider } from '@/lib/app-state'
 import { BRAND_LOGO_URL } from '@/components/shared/brand-logo'
-import { LiveChatWidget } from '@/components/shared/live-chat'
-import { COMPANY_ADDRESS, COMPANY_MAPS_URL } from '@/lib/site'
+import { COMPANY_ADDRESS, COMPANY_EMAIL, COMPANY_MAPS_URL, COMPANY_PHONE } from '@/lib/site'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -39,8 +38,8 @@ const localBusinessJsonLd = {
   name: 'ArcBest Logistics LLC',
   url: 'https://arcbest.com',
   logo: BRAND_LOGO_URL,
-  telephone: '+1-800-555-0147',
-  email: 'support@arcbest.com',
+  telephone: COMPANY_PHONE,
+  email: COMPANY_EMAIL,
   address: {
     '@type': 'PostalAddress',
     streetAddress: COMPANY_ADDRESS.street,
@@ -95,6 +94,7 @@ export default function RootLayout({
           __html: `
             var _smartsupp = _smartsupp || {};
             _smartsupp.key = '86ae2f7261408505bf9445e2517db0ef57db95ba';
+            _smartsupp.offsetY = 80;
             window.smartsupp || (function(d) {
               var s, c, o = window.smartsupp = function(){ o._.push(arguments) };
               o._ = [];
@@ -130,7 +130,6 @@ export default function RootLayout({
           </AppStateProvider>
           {/* Inside the provider so toasts pick up the active theme. */}
           <Toaster />
-          <LiveChatWidget />
         </ThemeProvider>
         <Analytics />
         {/* Real-user Core Web Vitals (LCP / INP / CLS) so regressions are visible
