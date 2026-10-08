@@ -84,6 +84,8 @@ export default function AdminShipmentDetailPage() {
   const [statusOpen, setStatusOpen] = useState(false);
   const [drafts, setDrafts] = useState({ destination: "", address: "", currentLocation: "" });
   const [imageBusy, setImageBusy] = useState(false);
+  const [estimatedPriceDraft, setEstimatedPriceDraft] = useState("");
+  const [savingEstimatedPrice, setSavingEstimatedPrice] = useState(false);
 
   const applyTimer = useRef<number | null>(null);
   const locationTimer = useRef<number | null>(null);
@@ -109,8 +111,9 @@ export default function AdminShipmentDetailPage() {
       address: shipment.recipient.address,
       currentLocation: shipment.currentLocation,
     });
+    setEstimatedPriceDraft(shipment.cost.toFixed(2));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shipment?.id, shipment?.lastUpdated]);
+  }, [shipment?.id, shipment?.lastUpdated, shipment?.cost]);
 
   const customer: Customer | undefined = useMemo(
     () => (shipment ? customers.find((c) => c.id === shipment.customerId) : undefined),
@@ -135,6 +138,44 @@ export default function AdminShipmentDetailPage() {
 
   const advanceStatus: ShipmentStatus | null =
     shipment && stageIndex >= 0 && stageIndex < LAST_JOURNEY_INDEX ? SHIPMENT_JOURNEY[stageIndex + 1] : null;
+
+  const saveEstimatedPrice = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!shipment) return;
+
+    const value = Number(estimatedPriceDraft);
+    if (!Number.isFinite(value) || value < 0 || value > 9_999_999_999.99) {
+      toast.error("Enter a price from 0 to 9,999,999,999.99.");
+      return;
+    }
+    const cost = Math.round(value * 100) / 100;
+    const client = getSupabaseBrowser();
+    if (!client) {
+      toast.error("Shipment database is not configured.");
+      return;
+    }
+
+    setSavingEstimatedPrice(true);
+    try {
+      const { data: updatedShipment, error } = await client
+        .from("shipments")
+        .update({ cost, last_updated: new Date().toISOString() })
+        .eq("id", shipment.id)
+        .select("id, cost")
+        .maybeSingle();
+      if (error || !updatedShipment) {
+        throw new Error(error?.message ?? "Could not save the estimated price.");
+      }
+
+      setEstimatedPriceDraft(Number(updatedShipment.cost).toFixed(2));
+      await broadcastShipmentChange(client, shipment.trackingNumber, "price");
+      toast.success("Estimated price saved.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save the estimated price.");
+    } finally {
+      setSavingEstimatedPrice(false);
+    }
+  };
 
   const addImages = async (fileList: FileList | null) => {
     if (!shipment || !fileList?.length) return;
@@ -649,11 +690,6 @@ export default function AdminShipmentDetailPage() {
             />
             <InfoRow label="Method" value={shipment.shippingMethod} icon={<Truck className="h-3.5 w-3.5" />} />
             <InfoRow
-              label="Cost"
-              value={formatCurrency(shipment.cost, shipment.currency)}
-              icon={<Banknote className="h-3.5 w-3.5" />}
-            />
-            <InfoRow
               label="Created"
               value={formatDateTime(shipment.createdAt)}
               icon={<Clock className="h-3.5 w-3.5" />}
@@ -664,6 +700,47 @@ export default function AdminShipmentDetailPage() {
               icon={<History className="h-3.5 w-3.5" />}
             />
           </div>
+
+          <section className="rounded-xl border border-border/70 bg-muted/15 p-3 sm:p-4">
+            <div className="mb-3 flex items-start gap-2.5">
+              <span className="mt-0.5 text-primary"><Banknote className="h-4 w-4" /></span>
+              <div>
+                <h4 className={ADMIN_TYPE.value}>Estimated price</h4>
+                <p className={cn(ADMIN_TYPE.help, "mt-0.5")}>
+                  Customer-facing amount · {shipment.currency}
+                </p>
+              </div>
+            </div>
+            <form onSubmit={saveEstimatedPrice} className="flex flex-col gap-2 sm:flex-row">
+              <label htmlFor="shipment-estimated-price" className="sr-only">Estimated price</label>
+              <div className="relative min-w-0 flex-1">
+                <Input
+                  id="shipment-estimated-price"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  max="9999999999.99"
+                  step="0.01"
+                  required
+                  value={estimatedPriceDraft}
+                  onChange={(event) => setEstimatedPriceDraft(event.target.value)}
+                  disabled={savingEstimatedPrice}
+                  className="h-11 rounded-xl pr-16 font-mono"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                  {shipment.currency}
+                </span>
+              </div>
+              <Button
+                type="submit"
+                disabled={savingEstimatedPrice || Number(estimatedPriceDraft) === shipment.cost}
+                className="h-11 rounded-xl px-5"
+              >
+                {savingEstimatedPrice ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {savingEstimatedPrice ? "Saving…" : "Save price"}
+              </Button>
+            </form>
+          </section>
 
           {shipment.instructions && (
             <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
